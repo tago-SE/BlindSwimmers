@@ -80,10 +80,11 @@ router.get('/delete', function(req, res, next) {
     (async () => {  
         try {
             var result = await EntriesDao.deleteManyByArrayQuery(queries);
+            var resObject = {"deletedCount": result.deletedCount };
             if (result.deletedCount > 0)
-                Response.sendObject(res, HttpStatus.OK, result);
+                Response.sendObject(res, HttpStatus.OK, resObject);
             else 
-                Response.sendObject(res, HttpStatus.NOT_FOUND, result);
+                Response.sendObject(res, HttpStatus.NOT_FOUND, resObject);
         } catch(err) {
             Response.sendObject(res, HttpStatus.INTERNAL_SERVER_ERROR, err);
         }
@@ -112,7 +113,10 @@ router.post('/insert', function(req, res, next) {
     (async () => {  
         try {
             var result = await EntriesDao.insertOne(entry);
-            Response.sendObject(res, HttpStatus.OK, result);
+            Response.sendObject(res, HttpStatus.OK, {
+                "insertedCount": result.insertedCount,
+                "ops": result.ops
+            });
         } catch(err) {
             Response.sendObject(res, HttpStatus.INTERNAL_SERVER_ERROR, err);
         }
