@@ -53,7 +53,9 @@ router.get('/', function(req, res, next) {
     })();
 });
 
-
+/**
+ * Deletes entries matching the url query arguments
+ */
 router.get('/delete', function(req, res, next) {
 
     var queries = [];
