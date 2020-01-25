@@ -1,6 +1,6 @@
 class Entry {
     
-    constructor() {
+    constructor() {//Remnant from old use of code?
         this.entries = [];
         this.user_id = undefined;
         this.session_id = undefined;

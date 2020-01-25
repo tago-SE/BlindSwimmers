@@ -12,7 +12,7 @@ const DEFEAULT_LIMIT = 100
  * Query entries inside the repository. 
  */
 router.get('/', function(req, res, next) {
-
+    //What should happen if one of the varables are undefined or have the wrong type?
     var queries = [];
 
     if (req.query.x !== undefined)
@@ -26,6 +26,7 @@ router.get('/', function(req, res, next) {
     if (req.query.session_id !== undefined)
         queries.push({['session_id']: req.query.session_id});
 
+    //What is page and limit used for?
     // Page operator    
     var page = 0
     if (req.query.page !== undefined) 
@@ -52,7 +53,7 @@ router.get('/', function(req, res, next) {
         }
     })();
 });
-
+//delete is a get operation, why not a delete?
 /**
  * Deletes entries matching the url query arguments
  */
@@ -104,6 +105,7 @@ router.post('/insert', function(req, res, next) {
     entry.time = req.body.time;
 
     // Validates that the object contains all the proper arguments
+    //Does it validate that they are of the right type also?
     if (!entry.validateState()) {
         Response.sendObject(res, HttpStatus.BAD_REQUEST, "Missing body arguments.");
         return;

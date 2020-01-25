@@ -11,8 +11,4 @@ var sendObject = function sendResponseObject(res, statusCode, object) {
     res.end(JSON.stringify(object));
 }
 
-module.exports = {
-
-    sendObject: sendObject
-
-};
+module.exports = {sendObject: sendObject};
