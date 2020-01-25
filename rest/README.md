@@ -37,15 +37,15 @@ Returns a insertion response.
 
 #### HTTP Request
 
-    GET: "/entries/delete"
+    POST: "/entries/insert"
 
     BODY: {
-        "x": "HEEEEEEEEEY",
-        "y": "HEEEEEEEEEY",
-        "z": "HEEEEEEEEEY"
+        "x": "155",
+        "y": "155",
+        "z": "1"
     }
 
-Example:    /entries/delete?_id=5e2c409cb8defa0e14f24e55 
+Example:    /entries/insert
 
 #### HTTP Response 
 
