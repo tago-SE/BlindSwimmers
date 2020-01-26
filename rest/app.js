@@ -11,6 +11,7 @@ var servicesRouter = require('./routes/entries');
 var app = express();
 
 // view engine setup
+//Do we need a view for a interface?
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 

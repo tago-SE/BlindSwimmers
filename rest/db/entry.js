@@ -4,7 +4,7 @@ class Entry {
         this.x = undefined;
         this.y = undefined;
         this.z = undefined;
-        this.user_id = undefined;//User_id can i be used to specifi a person or is it just a arbritary number? GDPR.
+        this.user_id = undefined;//User_id can i be used to specific a person or is it just a arbritary number? GDPR.
         this.session_id = undefined;
         this.time = undefined;
     }
