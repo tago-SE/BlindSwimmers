@@ -4,7 +4,6 @@ DBNAME = process.env.db_name
 URL = process.env.db_url
 const COLLECTION_KEY = 'entries';
 
-
 module.exports = class EntriesDao {
 
     /**
@@ -80,6 +79,4 @@ module.exports = class EntriesDao {
             });
         });
     }
-
 }
-    

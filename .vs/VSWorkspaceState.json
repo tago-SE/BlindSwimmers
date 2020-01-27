@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\rest",
-    "\\rest\\db"
+    "\\rest\\db",
+    "\\rest\\routes"
   ],
-  "SelectedNode": "\\rest\\db\\entries_dao.js",
+  "SelectedNode": "\\rest\\routes\\entries.js",
   "PreviewInSolutionExplorer": false
 }
