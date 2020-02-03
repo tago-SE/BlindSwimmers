@@ -85,7 +85,7 @@ public class ScannerFragment extends ListFragment {
         mAdapter = new ScanResultAdapter(getActivity().getApplicationContext(),
                 LayoutInflater.from(getActivity()));
         mHandler = new Handler();
-
+        //
     }
 
     @Override
