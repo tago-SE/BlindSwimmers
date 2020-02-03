@@ -2,5 +2,5 @@
     <string name="app_name">Qpid</string>
     <string name="ble_not_supported">It aint supported</string>
     <string name="ble_is_supported">this shit is supported</string>
-    <string name="ble_uuid">CDB7950D-73F1-4D4D-8E47-C090502DBD63</string>
+    <string name="ble_uuid">19B10000-E8F2-537E-4F6C-D104768A1214</string>
 </resources>

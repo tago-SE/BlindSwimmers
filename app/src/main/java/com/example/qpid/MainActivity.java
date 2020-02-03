@@ -34,7 +34,8 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private boolean mScanning;
-    private Handler handler;
+    private Handler handler = new Handler();
+
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private TextView mText;
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdvertiseButton.setOnClickListener( this );
 
 
-
+      //  mBluetoothLeScanner = new BluetoothAdapter();
         mBluetoothLeScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
       /*  ScanFilter filter = new ScanFilter.Builder()
                 .setServiceUuid( new ParcelUuid(UUID.fromString( getString(R.string.ble_uuid ) ) ) )
@@ -86,43 +87,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         filters.add( filter );*/
 
-        ScanSettings settings = new ScanSettings.Builder()
+       /* ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode( ScanSettings.SCAN_MODE_LOW_LATENCY )
                 .build();
-        mBluetoothLeScanner.startScan(filters,settings,mScanCallback);
-    }
-    public void advertise(BluetoothLeAdvertiser advertiser, AdvertiseSettings settings){
-        ParcelUuid pUuid = new ParcelUuid( UUID.fromString( getString( R.string.ble_uuid ) ) );
-
-        AdvertiseData data = new AdvertiseData.Builder()
-                .setIncludeDeviceName( true )
-                .addServiceUuid( pUuid )
-                .addServiceData( pUuid, "Data".getBytes( Charset.forName( "UTF-8" ) ) )
-                .build();
-
-        AdvertiseCallback advertisingCallback = new AdvertiseCallback() {
-            @Override
-            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                Log.e( "BLE", "Advertising onStartSuccess: ");
-                super.onStartSuccess(settingsInEffect);
-            }
-
-            @Override
-            public void onStartFailure(int errorCode) {
-                Log.e( "BLE", "Advertising onStartFailure: " + errorCode );
-                super.onStartFailure(errorCode);
-            }
-        };
-        advertiser.startAdvertising( settings, data, advertisingCallback );
-
-
-        //below is the scan filter
+        mBluetoothLeScanner.startScan(filters,settings,mScanCallback);*/
     }
 
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
+            System.out.println("Geronimo!");
             if( result == null
                     || result.getDevice() == null
                     || TextUtils.isEmpty(result.getDevice().getName()) )
@@ -165,7 +140,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTxPowerLevel( AdvertiseSettings.ADVERTISE_TX_POWER_HIGH )
                 .setConnectable( false )
                 .build();
-        advertise(advertiser,settings);
+       //advertise(advertiser,settings);
+        ParcelUuid pUuid = new ParcelUuid( UUID.fromString( getString( R.string.ble_uuid ) ) );
+
+        AdvertiseData data = new AdvertiseData.Builder()
+                .setIncludeDeviceName( true )
+                .addServiceUuid( pUuid )
+                //.addServiceData( pUuid, "Data".getBytes( Charset.forName( "UTF-8" ) ) )
+                .build();
+        AdvertiseCallback advertisingCallback = new AdvertiseCallback() {
+            @Override
+            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                Log.e( "BLE", "Advertising onStartSuccess: " + 0 );
+                super.onStartSuccess(settingsInEffect);
+            }
+
+            @Override
+            public void onStartFailure(int errorCode) {
+                Log.e( "BLE", "Advertising onStartFailure: " + errorCode );
+                super.onStartFailure(errorCode);
+            }
+        };
+
+        advertiser.startAdvertising( settings, data, advertisingCallback );
     }
 
     private void discover() {
@@ -174,24 +171,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setServiceUuid( new ParcelUuid(UUID.fromString( getString(R.string.ble_uuid ) ) ) )
                 .build();
         filters.add( filter );
+        ScanSettings settings = new ScanSettings.Builder()
+                .setScanMode( ScanSettings.SCAN_MODE_LOW_LATENCY )
+                .build();
+
+        mBluetoothLeScanner.startScan(filters,settings,mScanCallback);
+
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mBluetoothLeScanner.stopScan(mScanCallback);
+            }
+        }, 10000);
     }
 
-   /* private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            // Stops scanning after a pre-defined scan period.
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    bluetoothAdapter.stopLeScan(leScanCallback);
-                }
-            }, SCAN_PERIOD);
 
-            mScanning = true;
-            bluetoothAdapter.startLeScan(leScanCallback);
-        } else {
-            mScanning = false;
-            bluetoothAdapter.stopLeScan(leScanCallback);
-        }
-    }*/
 }
