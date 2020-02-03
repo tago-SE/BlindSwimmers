@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Qpid</string>
+    <string name="ble_not_supported">It aint supported</string>
+    <string name="ble_is_supported">this shit is supported</string>
+</resources>
