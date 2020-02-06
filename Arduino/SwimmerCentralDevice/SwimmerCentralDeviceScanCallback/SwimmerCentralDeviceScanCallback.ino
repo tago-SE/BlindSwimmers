@@ -16,6 +16,8 @@
 #include <ArduinoBLE.h>
 #include <string.h>
 
+String arduinoName = "Arduino Swimmer 1";
+
 int loopValue = 0;
 
 int sensorArraySize = 2;
@@ -40,7 +42,7 @@ void setup() {
 
   //=========================== used for connecting with app =================
   // set the local name peripheral advertises
-  BLE.setLocalName("Arduino Swimmer 1");
+  BLE.setLocalName(arduinoName);
 
   // start advertising
   BLE.advertise();
@@ -57,7 +59,7 @@ void setup() {
 void loop() {
   // poll the central for events
   BLE.poll();
-  if(loopValue == 100000)
+  if(loopValue == 100000) //just a refresh scan value (not corresponding to a specific time, just a value..)
   {
     Serial.println("loop..");
     loopValue = 0;
