@@ -27,13 +27,13 @@ int nearEdgeLoopValue = nearEdgeLoopValueMAX; //the acctual loop
 
 //number of sensor looking for by the arduino (sensor near edges)
 int const sensorArraySize = 2;
-String sensorArray [2];
+String sensorArray [sensorArraySize];
 
 const int ledPin = LED_BUILTIN; // pin to use for the LED
 
 //fingerprint global variables
-int fingerprintArraySize = 10;
-int fingerprintArray [10];
+int const fingerprintArraySize = 10;
+int fingerprintArray [fingerprintArraySize];
 int fingerprintIndex = 0;
 bool fingerprintReady;
 
@@ -52,10 +52,10 @@ bool startAdvertisingForBLEMobileConnection; //starts to advertising for a mobil
 //======== global variables for Bluetooth-connection with mobile-phone ============
 //String ArduinoName = "Arduino Swimmer 1"; <-- does't work with BLE.setLocalName(ArduinoName); ..?
 
-BLEService swimmerService("19B10000-E8F2-537E-4F6C-D104768A1214"); // create service
+BLEService swimmerService("19B10001-E8F2-537E-4F6C-D104768A1214"); // create service
 
 // create switch characteristic and allow remote device to read and write
-BLEByteCharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
+BLECharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite, 20);
 
 /**
  * Init
@@ -90,7 +90,7 @@ void setup() {
   // assign event handlers for characteristic
   switchCharacteristic.setEventHandler(BLEWritten, switchCharacteristicWritten);
   // set an initial value for the characteristic
-  switchCharacteristic.setValue(0);
+  switchCharacteristic.setValue("abcdefg");
 
   // set the local name peripheral advertises
   BLE.setLocalName("Arduino Swimmer 1");
@@ -364,58 +364,6 @@ bool isNearEdge()
   }
 }
 
-//============================== fingerprinting ==========================================
-/*
- * Wrapper to algorithm
- */
-void fingerprint(int rssiValue)
-{
-  addRssiToArray(rssiValue);
-}
-
-/**
- * Adds a new RSSI value to arraylist
- * ¨
- * If arraylist allready filled, start to fill it from start again
- */
-void addRssiToArray(int rssiValue)
-{
-  fingerprintArray[fingerprintIndex] = rssiValue;
-  fingerprintIndex++;
-
-  if(fingerprintIndex == fingerprintArraySize)
-  {
-    //array now filled
-    fingerprintIndex = 0;
-    fingerprintReady = true;
-  }
-}
-
-/**
- * Gets the average rssi from array
- */
-int getAverageFingerprint()
-{
-  double average = 0;
-  for(int i = 0; i < fingerprintArraySize; i++)
-  {
-    average = average + fingerprintArray[i];
-  }
-
-  average = average / fingerprintArraySize;
-  return average;
-}
-
-/**
- * Init array with 0s
- */
-void zeroFingerprintArray()
-{
-  for(int i = 0; i < fingerprintArraySize; i++)
-  {
-    fingerprintArray[i] = 0;
-  }
-}
 
 
 
