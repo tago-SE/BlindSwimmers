@@ -1,63 +1,188 @@
 bool connectedToDevice = false;
 
+const int advertisingLedLoopMAX = 100000;
+int advertisingLedLoop = 0;
+bool advertisingLedBool = false;
+
+/**
+ * Device connects
+ */
 void blePeripheralConnectHandler(BLEDevice central)
 {
   // central connected event handler
-  Serial.print("Connected event, central: ");
-  Serial.println(central.address());
+  if(dedugging)
+  {
+    Serial.print("Connected event, central: ");
+    Serial.println(central.address());
+  }
+  
   connectedToDevice = true;
 }
 
+/**
+ * Device disconnect
+ */
 void blePeripheralDisconnectHandler(BLEDevice central)
 {
   // central disconnected event handler
-  Serial.print("Disconnected event, central: ");
-  Serial.println(central.address());
+  if(dedugging)
+  {
+    Serial.print("Disconnected event, central: ");
+    Serial.println(central.address());
+  }
+  
   connectedToDevice = false;
 }
 
+
+int const receivedBytesArraySize = 20;
+char receivedBytesArray [receivedBytesArraySize];
+
+/**
+ * handles all incoming bytes (strings) from mobil app
+ */
 void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteristic)
 {
   // central wrote new value to characteristic, update LED
-  //Serial.print("Characteristic event, written: ");
-
-  /*if (switchCharacteristic.value()) {
-    Serial.println("LED on");
-    digitalWrite(ledPin, HIGH);
-  } else {
-    Serial.println("LED off");
-    digitalWrite(ledPin, LOW);
+  if(dedugging)
+  {
+    Serial.print("Characteristic event, written.length: ");
+    Serial.println(switchCharacteristic.valueLength());
   }
-  */
+  
+  switchCharacteristic.readValue(receivedBytesArray, receivedBytesArraySize);
+  String receivedStrng = String(receivedBytesArray);
+
+  if(dedugging)
+  {
+    Serial.print("Received from mobile: ");
+    Serial.println(receivedStrng);
+  }
+
+  //What to do with the sent message
+  handleAppSentMessage(receivedStrng);
+  
+  //switchCharacteristic.setValue(receivedBytesArray);
 }
 
-const int writeByteArraySize = 16;
-char writeByteArray[writeByteArraySize];
 /**
- * Test function to send data when connected to a device (random number)
+ * STILL IN PROGRESS
  */
+void switchCharacteristicNotify(BLEDevice central, BLECharacteristic characteristic)
+{
+  if(dedugging)
+  {
+    Serial.print("Characteristic event, notify");
+  }
+  
+}
+
 void sendData()
 {
-  if(connectedToDevice)
+  if(connectedToDevice) //arduino connected to a mobil, led on
   {
-    writeByteArray[0] = 'h';
-    writeByteArray[1] = 'i';
-    writeByteArray[2] = ' ';
-    writeByteArray[3] = 'f';
-    writeByteArray[4] = 'r';
-    writeByteArray[5] = 'o';
-    writeByteArray[6] = 'm';
-    writeByteArray[7] = ' ';
-    writeByteArray[8] = 'a';
-    writeByteArray[9] = 'r';
-    writeByteArray[10] = 'd';
-    writeByteArray[11] = 'u';
-    writeByteArray[12] = 'i';
-    writeByteArray[13] = 'n';
-    writeByteArray[14] = 'o';
-    writeByteArray[14] = '\0';
-    //switchCharacteristic.setValue("hi from arduino", writeByteArraySize);
+    
+    //switchCharacteristic.setValue("hi from arduino");
+    digitalWrite(ledPin, HIGH);
     //switchCharacteristic.writeValue(writeByteArray, writeByteArraySize);
     //switchCharacteristic.writeValue(17);
+    
+  }
+  else //if not connected blink led to indicat its not connected
+  {
+    if(advertisingLedLoop == 0)
+    {
+      advertisingLedLoop = advertisingLedLoopMAX;
+      toggleLed();
+    }
+    else
+    {
+      advertisingLedLoop--;
+    }
+  }
+}
+
+void toggleLed()
+{
+  if(advertisingLedBool)
+  {
+    advertisingLedBool = false;
+    digitalWrite(ledPin, LOW);
+  }
+  else
+  {
+    advertisingLedBool = true;
+    digitalWrite(ledPin, HIGH);
+  }
+}
+
+/**
+ * handles ever message sent by the app
+ */
+void handleAppSentMessage(String str)
+{
+  if(str.startsWith("mode"))
+  {
+    str = str.substring(4);
+
+    if(str.startsWith("_0"))
+    {
+      if(dedugging)
+      {
+        Serial.print("mode_0 received, changing mode to paring mode");
+      }
+      digitalWrite(ledPin, LOW);
+      loopingMode = 2;
+    }
+    else if(str.startsWith("_1"))
+    {
+      if(dedugging)
+      {
+        Serial.print("mode_1 received, changing mode to training mode (paring done)");
+      }
+      digitalWrite(ledPin, LOW);
+      loopingMode = 2;
+    }
+    else if(str.startsWith("_2"))
+    {
+      if(dedugging)
+      {
+        Serial.print("mode_2 received, changing mode to running mode (paring done)");
+      }
+      digitalWrite(ledPin, LOW);
+      loopingMode = 2;
+    }
+  }
+  else if(str.startsWith("SN"))
+  {
+    str = str.substring(2);
+    if(str.startsWith("_1"))
+    {
+      str = str.substring(2);
+      sensorArray[0] = str;
+    }
+    else if(str.startsWith("_2"))
+    {
+      str = str.substring(2);
+      sensorArray[1] = str;
+    }
+
+    if(dedugging)
+    {
+      //prints number of sensors and there name
+      Serial.print("  Number edge of sensors: ");
+      Serial.println(sensorArraySize);
+      for(int i = 0; i < sensorArraySize; i++)
+      {
+        Serial.print("  Sensor [");
+        Serial.print((i + 1));
+        Serial.print("]: ");
+        Serial.println(sensorArray[i]);
+      }
+    }
+  }
+  else
+  {
+    
   }
 }

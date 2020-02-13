@@ -17,6 +17,12 @@
 #include <ArduinoBLE.h>
 #include <string.h>
 
+/**
+ * true = when debugging (will not start arduino unitil serial monitor is active when set to true)
+ * false = when not debugging (starts arduino instant when power on)
+ */
+bool dedugging = true;
+
 //A loop value for how often the arduino will restart rescanning
 int const restartLoopValueMAX = 100000; //max value of loop (how often it will loop)
 int restartLoopValue = restartLoopValueMAX; //the acctual loop
@@ -46,8 +52,6 @@ bool fingerprintReady;
  * Default as 0 in init function
  */
 int loopingMode;
-bool startScanning; //start scanning for running mode (needs to be done only once per runingMode start)
-bool startAdvertisingForBLEMobileConnection; //starts to advertising for a mobile connection (needs to be done once every time paringMode)
 
 //======== global variables for Bluetooth-connection with mobile-phone ============
 //String ArduinoName = "Arduino Swimmer 1"; <-- does't work with BLE.setLocalName(ArduinoName); ..?
@@ -55,14 +59,19 @@ bool startAdvertisingForBLEMobileConnection; //starts to advertising for a mobil
 BLEService swimmerService("19B10001-E8F2-537E-4F6C-D104768A1214"); // create service
 
 // create switch characteristic and allow remote device to read and write
-BLECharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite, 20);
+BLECharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite | BLENotify, 40);
 
 /**
  * Init
  */
 void setup() {
   Serial.begin(9600);
-  while (!Serial);
+  if(dedugging)
+  {
+    //wait till serial monitor is on
+    while (!Serial);
+  }
+  
 
   // begin initialization
   if (!BLE.begin()) {
@@ -71,7 +80,11 @@ void setup() {
     while (1);
   }
 
-  Serial.println("Arduino setup now running");
+  if(dedugging)
+  {
+    Serial.println("Arduino setup now running");
+  }
+    
 
   //========== used for setting up bluetooth connection with mobil-app ============
   // set the UUID for the service this peripheral advertises
@@ -89,15 +102,34 @@ void setup() {
 
   // assign event handlers for characteristic
   switchCharacteristic.setEventHandler(BLEWritten, switchCharacteristicWritten);
+
+  //egen test för notify
+  switchCharacteristic.setEventHandler(BLENotify, switchCharacteristicNotify);
+  
   // set an initial value for the characteristic
-  switchCharacteristic.setValue("abcdefg");
+  switchCharacteristic.setValue("Arduino Swimmer 1 message");
 
   // set the local name peripheral advertises
   BLE.setLocalName("Arduino Swimmer 1");
 
   sensorArray[0] = "SimplePeripheral";
   sensorArray[1] = "SimpleBLEBroadcaster";
-  
+
+  if(dedugging)
+  {
+    //prints number of sensors and there name
+    Serial.print("  Number edge of sensors: ");
+    Serial.println(sensorArraySize);
+    for(int i = 0; i < sensorArraySize; i++)
+    {
+      Serial.print("  Sensor [");
+      Serial.print((i + 1));
+      Serial.print("]: ");
+      Serial.println(sensorArray[i]);
+    }
+  }
+
+  digitalWrite(ledPin, LOW);
   //==============================================================================
 
   // set the discovered event handle (used for scanning in training and running mode)
@@ -113,9 +145,11 @@ void setup() {
   // start scanning for peripherals with duplicates
   //BLE.scanForName("SimplePeripheral"); 
   //BLE.scan(true); //first 
-  startScanning = true;
-  startAdvertisingForBLEMobileConnection = true;
-  Serial.println("Arduino setup done");
+  if(dedugging)
+  {
+    Serial.println("Arduino setup done");
+  }
+  
 }
 
 //========================= Forever-loop =====================================
@@ -129,45 +163,55 @@ void loop()
   {
     //paring mode
 
-    //printing new mode when mode is changed
+    //if mode changes, do setup once when modechanges
     if(newMode != loopingMode)
     {
-      Serial.println("Paring mode");
+      if(dedugging)
+      {
+        Serial.println("Paring mode");
+        Serial.println("Start advertising, waiting for connections...");
+
+        // start advertising
+        BLE.advertise();
+      }
+      
       newMode = loopingMode;
     }
     paringModeFunction();
-    
-    startScanning = true;
     
   }
   else if(loopingMode == 1)
   {
     //training mode
 
-    //printing new mode when mode is changed
+    //if mode changes, do setup once when modechanges
     if(newMode != loopingMode)
     {
-      Serial.println("Training mode");
+      if(dedugging)
+      {
+        Serial.println("Training mode");
+      }
       newMode = loopingMode;
     }
     trainingModeFunction();
-    
-    startScanning = true;
-    startAdvertisingForBLEMobileConnection = true;
   }
   else if(loopingMode == 2)
   {
     //running mode
 
-    //printing new mode when mode is changed
+    //if mode changes, do setup once when modechanges
     if(newMode != loopingMode)
     {
-      Serial.println("Running mode");
+      if(dedugging)
+      {
+        Serial.println("Running mode");
+      }
+      //start scanning for sensores
+      BLE.scan(true); //first 
+      
       newMode = loopingMode;
     }
     runningModeFunction();
-
-    startAdvertisingForBLEMobileConnection = true;
   }
 }
 
@@ -176,18 +220,7 @@ void loop()
  */
 void paringModeFunction()
 {
-  if(startAdvertisingForBLEMobileConnection)
-  {
-    Serial.println("Start advertising, waiting for connections...");
-
-    // start advertising
-    BLE.advertise();
-    
-    startAdvertisingForBLEMobileConnection = false;
-  }
-
   BLE.poll();
-
   sendData();
 
 }
@@ -205,19 +238,16 @@ void trainingModeFunction()
  */
 void runningModeFunction()
 {
-  if(startScanning)
-  {
-    // start scanning for peripherals with duplicates
-    BLE.scan(true); //first 
-    startScanning = false;
-  }
   // poll the central for events
   BLE.poll();
 
   //looping for restart scanning
   if(restartLoopValue == 0)
   {
-    Serial.println("restart scanning loop..");
+    if(dedugging)
+    {
+      Serial.println("restart scanning loop..");
+    }
     restartLoopValue = restartLoopValueMAX;
     restartScan();
   }
@@ -280,39 +310,50 @@ void bleCentralDiscoverHandler(BLEDevice peripheral) {
  */
 void handlePeripheralDevice(BLEDevice peripheral)
 {
-  Serial.println("-----------------------");
-  Serial.print("Peripheral device \"");
-  Serial.print(peripheral.localName());
-  Serial.println("\" discovered");
-  
-  // print address
-  Serial.print("Address: ");
-  Serial.println(peripheral.address());
+  if(dedugging)
+  {
+    Serial.println("-----------------------");
+    Serial.print("Peripheral device \"");
+    Serial.print(peripheral.localName());
+    Serial.println("\" discovered");
 
-  // print the local name, if present
-  if (peripheral.hasLocalName()) {
-    Serial.print("Local Name: ");
-    Serial.println(peripheral.localName());
-  }
+    // print address
+    Serial.print("Address: ");
+    Serial.println(peripheral.address());
 
-  // print the advertised service UUIDs, if present
-  if (peripheral.hasAdvertisedServiceUuid()) {
-    Serial.print("Service UUIDs: ");
-    for (int i = 0; i < peripheral.advertisedServiceUuidCount(); i++) {
-      Serial.print(peripheral.advertisedServiceUuid(i));
-      Serial.print(" ");
+    // print the local name, if present
+    if (peripheral.hasLocalName()) {
+      Serial.print("Local Name: ");
+      Serial.println(peripheral.localName());
     }
-    Serial.println();
+  
+    // print the advertised service UUIDs, if present
+    if (peripheral.hasAdvertisedServiceUuid()) {
+      Serial.print("Service UUIDs: ");
+      for (int i = 0; i < peripheral.advertisedServiceUuidCount(); i++) {
+        Serial.print(peripheral.advertisedServiceUuid(i));
+        Serial.print(" ");
+      }
+      Serial.println();
+    }
+  
+    // print the RSSI
+    Serial.print("RSSI: ");
+    Serial.println(peripheral.rssi());
   }
-
-  // print the RSSI
-  Serial.print("RSSI: ");
-  Serial.println(peripheral.rssi());
+  
+  
+  
 
   fingerprint(peripheral.rssi());
 
-  Serial.print("Average RSSI here is: ");
-  Serial.println(getAverageFingerprint());
+  if(dedugging)
+  {
+    Serial.print("Average RSSI here is: ");
+    Serial.println(getAverageFingerprint());
+    Serial.println();
+  }
+  
 
   
 
@@ -322,7 +363,7 @@ void handlePeripheralDevice(BLEDevice peripheral)
   //Serial.println(distance);
   //getTXPower(peripheral.rssi());
   
-  Serial.println();
+  
   restartLoopValue = 0;
   restartScan();
 }
