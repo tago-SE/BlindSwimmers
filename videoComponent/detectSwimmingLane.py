@@ -18,11 +18,28 @@ dilated = cv2.dilate(blurred_frameHSV,convince,5)
 mask = cv2.inRange(dilated, lower_red, upper_red)
 #find Contours
 contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+cs = sorted(contours, key=cv2.contourArea) 
 if len(contours) != 0:
-    cv2.drawContours(dilated,contours,-1,255)
+    cv2.drawContours(mask,contours,-1,255)
+    c = max(contours, key = cv2.contourArea)
+    x,y,w,h = cv2.boundingRect(cs[len(cs)-1])
+    x2,y2,w2,h2 = cv2.boundingRect(cs[len(cs)-2])
+    if x > x2 :
+        rightX,rightY,rightW,rightH = x,y,w,h
+        leftX,leftY,leftW,leftH = x2,y2,w2,h2
+    else:
+        leftX,leftY,leftW,leftH = x,y,w,h
+        rightX,rightY,rightW,rightH = x2,y2,w2,h2
+    #print(len(cs))
+    #print(c)
+    #draw the biggest contour (c) in green
+   # cv2.rectangle(rawImage,(x,y),(x+w,y+h),(222,255,155),2)
+    cv2.rectangle(rawImage,(leftX,leftY),(leftX+leftW,leftY+leftH),(222,255,155),2)
+    cv2.rectangle(rawImage,(rightX,rightY),(rightX+rightW,rightX+rightH),(222,255,155),2)
     
 #Render the image
 cv2.imshow("Mask", mask)
+cv2.imshow("raw",rawImage)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
