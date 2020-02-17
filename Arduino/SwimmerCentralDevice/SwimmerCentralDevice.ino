@@ -221,8 +221,7 @@ void loop()
 void paringModeFunction()
 {
   BLE.poll();
-  sendData();
-
+  parinModeLoop();
 }
 
 /**

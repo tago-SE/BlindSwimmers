@@ -77,7 +77,7 @@ void switchCharacteristicNotify(BLEDevice central, BLECharacteristic characteris
   
 }
 
-void sendData()
+void parinModeLoop()
 {
   if(connectedToDevice) //arduino connected to a mobil, led on
   {
@@ -121,6 +121,7 @@ void toggleLed()
  */
 void handleAppSentMessage(String str)
 {
+  //mode change
   if(str.startsWith("mode"))
   {
     str = str.substring(4);
@@ -153,15 +154,16 @@ void handleAppSentMessage(String str)
       loopingMode = 2;
     }
   }
+  //set sensor name
   else if(str.startsWith("SN"))
   {
     str = str.substring(2);
-    if(str.startsWith("_1"))
+    if(str.startsWith("_1"))//sensor name 1
     {
       str = str.substring(2);
       sensorArray[0] = str;
     }
-    else if(str.startsWith("_2"))
+    else if(str.startsWith("_2")) //sensor name 2
     {
       str = str.substring(2);
       sensorArray[1] = str;
@@ -170,7 +172,7 @@ void handleAppSentMessage(String str)
     if(dedugging)
     {
       //prints number of sensors and there name
-      Serial.print("  Number edge of sensors: ");
+      Serial.print("  Number of edge sensors: ");
       Serial.println(sensorArraySize);
       for(int i = 0; i < sensorArraySize; i++)
       {
