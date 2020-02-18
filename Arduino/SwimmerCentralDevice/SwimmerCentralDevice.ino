@@ -21,7 +21,7 @@
  * true = when debugging (will not start arduino unitil serial monitor is active when set to true)
  * false = when not debugging (starts arduino instant when power on)
  */
-bool dedugging = true;
+bool dedugging = false;
 
 //A loop value for how often the arduino will restart rescanning
 int const restartLoopValueMAX = 100000; //max value of loop (how often it will loop)
