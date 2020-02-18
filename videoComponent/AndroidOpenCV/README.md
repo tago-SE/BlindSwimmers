@@ -24,17 +24,3 @@ Make sure build.gradle (Module: app) and build.gradle (Module:openCV have the sa
 
 
 Create a JNI Folder in srcs/main... (See Indian Guy)
-
-    private static String TAG = MainActivity.class.getSimpleName();
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-
-        if (OpenCVLoader.initDebug()) {
-            Log.d(TAG, "OpenCV loader success.");
-        } else {
-            Log.e(TAG, "OpenCV loader failure.");
-        }
-
-        Log.w(TAG, "Hello onCreate");
