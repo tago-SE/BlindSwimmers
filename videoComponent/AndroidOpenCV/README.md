@@ -1,9 +1,10 @@
 Adding OpenCV module to android studio project: 
 https://www.youtube.com/watch?v=pzuwrYgOnDQ
 
+OpenCV Android download: 
+https://opencv.org/releases/
 
 1. Make sure you download a version that suits your android studio version...
-
 
 2. new -> Import Module -> 
 C:\Program Files (x86)\opencv-3.4.7-android-sdk\OpenCV-android-sdk\sdk\java
