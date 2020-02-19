@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "OpenCV loader failure.");
         }
-
         Log.w(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
