@@ -61,6 +61,7 @@ void switchCharacteristicWritten(BLEDevice central, BLECharacteristic characteri
 
   //What to do with the sent message
   handleAppSentMessage(receivedStrng);
+  clearReceivedBytesArray();
   
   //switchCharacteristic.setValue(receivedBytesArray);
 }
@@ -162,11 +163,13 @@ void handleAppSentMessage(String str)
     {
       str = str.substring(2);
       sensorArray[0] = str;
+      switchCharacteristic.setValue("");
     }
     else if(str.startsWith("_2")) //sensor name 2
     {
       str = str.substring(2);
       sensorArray[1] = str;
+      switchCharacteristic.setValue("");
     }
 
     if(dedugging)
@@ -186,5 +189,13 @@ void handleAppSentMessage(String str)
   else
   {
     
+  }
+}
+
+void clearReceivedBytesArray()
+{
+  for(int i = 0; i < receivedBytesArraySize; i++)
+  {
+    receivedBytesArray[i] = '\0';
   }
 }
