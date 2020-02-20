@@ -121,13 +121,12 @@ public class MainCameraActivity extends AppCompatActivity implements
     }
 
     /*
-
     @Override
     public boolean onTouch(View v, MotionEvent e) {
         Log.w(TAG, "onTouch: " + v + ",  \n" + e.toString());
         return false;
     }
-*/
+    */
 
 
     /**
@@ -175,16 +174,10 @@ public class MainCameraActivity extends AppCompatActivity implements
                 break;
             default:
         }
-
         // Render Region Of Interest
-
         Imgproc.rectangle(mRgba,
                 camera.getRegionOfInterestStartPoint(),
                 camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
-
-
-        // Rect roi = new Rect(200, 200, 400, 400);
-        // Mat cropped = new Mat(mRgba, roi);
 
         return mRgba;
     }
