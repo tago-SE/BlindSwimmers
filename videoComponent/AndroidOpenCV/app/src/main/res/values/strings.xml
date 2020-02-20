@@ -3,4 +3,5 @@
     <string name="Title">Swimmer Taper App</string>
     <string name="configCameraButtonText">Config Camera</string>
     <string name="mainCameraButtonText">Main Camera</string>
+    <string name="resizeButtonText">Resize</string>
 </resources>

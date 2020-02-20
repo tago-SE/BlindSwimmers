@@ -1,13 +1,16 @@
 package s.m.myapplication;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.GestureDetectorCompat;
 import s.m.myapplication.model.CameraFacade;
 
+import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
@@ -18,6 +21,10 @@ import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -30,6 +37,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.w3c.dom.Text;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
@@ -52,6 +60,9 @@ public class MainCameraActivity extends AppCompatActivity implements
     private Mat mRgbaF;
     private Mat mRgbaT;
 
+    private Button resizeButton;
+    private int screenWidth;
+    private int screenHeight;
 
     // Manages the configurations for the camera
     private CameraFacade camera = CameraFacade.getInstance();
@@ -87,8 +98,8 @@ public class MainCameraActivity extends AppCompatActivity implements
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        int screenWidth = size.x;
-        int screenHeight = size.y;
+        screenWidth = size.x;
+        screenHeight = size.y;
         Log.w(TAG, "screenWidth=" + screenWidth);
         Log.w(TAG, "screenHeight=" + screenHeight);
 
@@ -97,6 +108,62 @@ public class MainCameraActivity extends AppCompatActivity implements
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        resizeButton = findViewById(R.id.resizeButton);
+        resizeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTextDialog();
+            }
+        });
+    }
+
+    private void showTextDialog()
+    {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText widthText = new EditText(this);
+        widthText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_NORMAL);
+        widthText.setHint("" + camera.getROIWidth());
+        TextView label = new TextView(this);
+        label.setText("Width");
+        layout.addView(label);
+        layout.addView(widthText);
+
+        final EditText heightText = new EditText(this);
+        heightText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_NORMAL);
+        heightText.setHint("" + camera.getROIHeight());
+        label = new TextView(this);
+        label.setText("Height");
+        layout.addView(label);
+        layout.addView(heightText);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter Dimensions");
+        builder.setView(layout);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+                    camera.setROIWidth(Integer.parseInt(widthText.getText().toString()));
+                } catch(NumberFormatException e ) {
+                    // No changes
+                }
+                try {
+                    String w = widthText.getText().toString();
+                    camera.setROIHeight(Integer.parseInt(heightText.getText().toString()));
+                } catch(NumberFormatException e ) {
+                    // No changes
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
     }
 
     @Override
@@ -120,16 +187,6 @@ public class MainCameraActivity extends AppCompatActivity implements
         return true;
     }
 
-    /*
-
-    @Override
-    public boolean onTouch(View v, MotionEvent e) {
-        Log.w(TAG, "onTouch: " + v + ",  \n" + e.toString());
-        return false;
-    }
-*/
-
-
     /**
      * This method is invoked when camera preview has started and upon screen rotation. The frame
      * width changes depending on if the device is in LANDS_SCAPE_MODE or PORTRAIT_MODE.
@@ -143,8 +200,10 @@ public class MainCameraActivity extends AppCompatActivity implements
         mRgbaF = new Mat(height, width, CvType.CV_8UC4);
         mRgbaT = new Mat(width, width, CvType.CV_8UC4);
         camera.setFrameDimensions(width, height);
+        ViewGroup.LayoutParams params = resizeButton.getLayoutParams();
+        params.width = (screenWidth - width)/2;
+        resizeButton.setLayoutParams(params);
     }
-
 
     @Override
     public void onCameraViewStopped()
@@ -175,16 +234,10 @@ public class MainCameraActivity extends AppCompatActivity implements
                 break;
             default:
         }
-
         // Render Region Of Interest
-
         Imgproc.rectangle(mRgba,
                 camera.getRegionOfInterestStartPoint(),
                 camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
-
-
-        // Rect roi = new Rect(200, 200, 400, 400);
-        // Mat cropped = new Mat(mRgba, roi);
 
         return mRgba;
     }
