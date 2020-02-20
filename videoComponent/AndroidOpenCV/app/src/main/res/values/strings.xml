@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="Title">Swimmer Taper App</string>
+    <string name="camera_button">Camera</string>
+</resources>
