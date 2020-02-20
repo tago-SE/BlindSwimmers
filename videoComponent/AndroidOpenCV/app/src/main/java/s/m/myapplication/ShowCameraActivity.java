@@ -2,6 +2,9 @@ package s.m.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -58,6 +61,7 @@ public class ShowCameraActivity extends AppCompatActivity implements CameraBridg
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        permission();
         Log.w(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_camera);
@@ -65,6 +69,15 @@ public class ShowCameraActivity extends AppCompatActivity implements CameraBridg
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+    }
+
+    private void permission() {
+        String s = "CAMERA";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, 1);
+                }
+        }
     }
 
     public void onCameraViewStarted(int width, int height)
