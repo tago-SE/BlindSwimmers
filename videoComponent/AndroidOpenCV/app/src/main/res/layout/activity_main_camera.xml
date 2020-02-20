@@ -16,31 +16,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_default="percent"
-        app:layout_constraintHeight_percent="0.50"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-
-        opencv:camera_id="any"
-        opencv:show_fps="true"
-        />
-
-    <Button
-        android:id="@+id/imageCaptureButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_default="percent"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/surface_view"
+        app:layout_constraintTop_toTopOf="parent"
+        opencv:camera_id="any"
+        opencv:show_fps="true" />
 
-        android:focusable="true"
-
-        android:bottomRightRadius="10dp"
-        android:bottomLeftRadius="10dp"
-        android:topLeftRadius="10dp"
-        android:topRightRadius="10dp"
-        />
 </androidx.constraintlayout.widget.ConstraintLayout>

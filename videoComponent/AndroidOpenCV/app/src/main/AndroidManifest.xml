@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
@@ -31,12 +30,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ShowCameraActivity"></activity>
+        <activity android:name=".MainCameraActivity"></activity>
         <activity android:name=".AdjustCaptureSettings"></activity>
-        <activity android:name=".ShowCameraActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
