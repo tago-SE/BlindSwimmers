@@ -27,15 +27,13 @@ import org.opencv.imgproc.Imgproc;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
-    private static String TEST = "TEST";
-    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.w(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        button = findViewById(R.id.camera);
+        Button button = findViewById(R.id.camera);
         button.setOnClickListener(this);
         if (OpenCVLoader.initDebug()) {
             Log.d(TAG, "OpenCV loader success.");
@@ -48,12 +46,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.camera : gotoCameraActivity();break;
+            case R.id.camera : gotoCameraActivity(); break;
             default: break;
         }
     }
+
     private void gotoCameraActivity(){
         Intent intent = new Intent(this, ShowCameraActivity.class);
         startActivity(intent);
     }
+
 }
