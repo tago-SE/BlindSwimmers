@@ -1,12 +1,16 @@
 package s.m.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import s.m.myapplication.model.Camera;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceView;
+import android.view.View;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -16,10 +20,17 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // Reference: http://blog.codeonion.com/2016/04/09/show-camera-on-android-app-using-opencv-for-android/
-public class ShowCameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class ShowCameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener, View.OnDragListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -34,6 +45,9 @@ public class ShowCameraActivity extends AppCompatActivity implements CameraBridg
     private Mat mRgba;
     private Mat mRgbaF;
     private Mat mRgbaT;
+
+    // Manages the configurations for the camera
+    private Camera camera = Camera.getInstance();
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this)
     {
@@ -65,6 +79,7 @@ public class ShowCameraActivity extends AppCompatActivity implements CameraBridg
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setOnTouchListener(this);
     }
 
     public void onCameraViewStarted(int width, int height)
@@ -103,6 +118,9 @@ public class ShowCameraActivity extends AppCompatActivity implements CameraBridg
                 break;
             default:
         }
+        Imgproc.rectangle(mRgba,
+                camera.getRegionOfInterestStartPoint(),
+                camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
         return mRgba;
     }
 
@@ -129,5 +147,18 @@ public class ShowCameraActivity extends AppCompatActivity implements CameraBridg
         super.onDestroy();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        Log.w(TAG, "onTouch: " + v + ", " + event.toString());
+        camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
+        return false;
+    }
+
+    @Override
+    public boolean onDrag(View v, DragEvent event) {
+        Log.w(TAG, "onDrag: " + v + ", " + event.toString());
+        return false;
     }
 }
