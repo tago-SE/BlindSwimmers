@@ -5,6 +5,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 public class Camera {
+
     private static final Camera ourInstance = new Camera();
 
     public static Camera getInstance() {
@@ -28,7 +29,5 @@ public class Camera {
     public void setRegionOfInterestStartPoint(int x, int y) {
         regionOfInterest.setStartPoint(x, y);
     }
-
-
 
 }
