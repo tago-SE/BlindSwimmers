@@ -1,6 +1,8 @@
 package s.m.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.GestureDetectorCompat;
 import s.m.myapplication.model.CameraFacade;
 
 import android.content.pm.ActivityInfo;
@@ -9,10 +11,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -28,8 +33,14 @@ import org.opencv.imgproc.Imgproc;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
+/**
+ *
+ * Ref: Detecting Gestures:
+ *  https://medium.com/@ali.muzaffar/android-detecting-a-pinch-gesture-64a0a0ed4b41
+ *  https://www.techotopia.com/index.php/Android_Pinch_Gesture_Detection_Tutorial_using_Android_Studio
+ */
 public class MainCameraActivity extends AppCompatActivity implements
-        CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener, View.OnDragListener {
+        CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -41,8 +52,6 @@ public class MainCameraActivity extends AppCompatActivity implements
     private Mat mRgbaF;
     private Mat mRgbaT;
 
-    private int screenWidth;
-    private int screenHeight;
 
     // Manages the configurations for the camera
     private CameraFacade camera = CameraFacade.getInstance();
@@ -78,8 +87,8 @@ public class MainCameraActivity extends AppCompatActivity implements
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        screenWidth = size.x;
-        screenHeight = size.y;
+        int screenWidth = size.x;
+        int screenHeight = size.y;
         Log.w(TAG, "screenWidth=" + screenWidth);
         Log.w(TAG, "screenHeight=" + screenHeight);
 
@@ -88,8 +97,38 @@ public class MainCameraActivity extends AppCompatActivity implements
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
-        mOpenCvCameraView.setOnTouchListener(this);
     }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int index = event.getActionIndex();
+        int action = event.getActionMasked();
+        int pointerId = event.getPointerId(index);
+        switch(action) {
+            case MotionEvent.ACTION_DOWN:
+                Log.w(TAG, "onTouchEvent:ACTION_DOWN");
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.w(TAG, "onTouchEvent:ACTION_MOVE");
+                camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                Log.w(TAG, "onTouchEvent:ACTION_CANCEL");
+                break;
+        }
+        return true;
+    }
+
+    /*
+
+    @Override
+    public boolean onTouch(View v, MotionEvent e) {
+        Log.w(TAG, "onTouch: " + v + ",  \n" + e.toString());
+        return false;
+    }
+*/
+
 
     /**
      * This method is invoked when camera preview has started and upon screen rotation. The frame
@@ -99,9 +138,7 @@ public class MainCameraActivity extends AppCompatActivity implements
      * @param height - the height of the frames that will be delivered
      */
     @Override
-    public void onCameraViewStarted(int width, int height) {
-        Log.w(TAG, "onCameraViewStarted:" +
-                " width=" + width + ", height=" + height);
+    public void onCameraViewStarted(int width, int height) { ;
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mRgbaF = new Mat(height, width, CvType.CV_8UC4);
         mRgbaT = new Mat(width, width, CvType.CV_8UC4);
@@ -179,17 +216,4 @@ public class MainCameraActivity extends AppCompatActivity implements
             mOpenCvCameraView.disableView();
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        Log.w(TAG, "onTouch: " + v + ",  \n" + event.toString());
-        camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
-        return false;
-    }
-
-    @Override
-    public boolean onDrag(View v, DragEvent event) {
-        Log.w(TAG, "onDrag: " + v + ", " + event.toString());
-        //camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
-        return false;
-    }
 }
