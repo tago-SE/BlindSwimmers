@@ -68,7 +68,7 @@ public class CustomCameraView extends JavaCameraView implements Camera.PictureCa
         // The camera preview was automatically stopped. Start it again.
         mCamera.startPreview();
        /* mCamera.setPreviewCallback(this);
-
+ss
         // Write the image in a file (in jpeg format)
         try {
             FileOutputStream fos = new FileOutputStream(mPictureFileName);
