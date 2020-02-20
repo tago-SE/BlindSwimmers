@@ -77,6 +77,8 @@ public class ShowCameraActivity extends AppCompatActivity implements
     private Button imageCaptureButton;
     private int PERMISSION_CODE =1000;
 
+    private byte[] picBytes;
+
 
 
     private void dispatchTakePictureIntent() {
@@ -127,19 +129,28 @@ public class ShowCameraActivity extends AppCompatActivity implements
                         //permission not enabled, request it.
                         String[] permission = {Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
                         requestPermissions(permission,PERMISSION_CODE);
-                        Log.d("PIC","A Picture was taken, post asking permit");
 
 
                         mOpenCvCameraView.takePicture(createImageFile());
-
+                        System.out.println();
+                        gotoAdjustCaptureSettings();
                     }
                     else{
-                       Log.d("PIC","A Picture was taken");
-                        mOpenCvCameraView.takePicture(createImageFile());
+                        Log.d("PIC","A Picture was taken");
+                       // mOpenCvCameraView.takePicture(createImageFile());
+                        gotoAdjustCaptureSettings();
                     }
                 }
             }
         });
+    }
+
+    private void gotoAdjustCaptureSettings() {
+        mOpenCvCameraView.disableView();
+        Log.d("ADJ","Going to A new activity " + picBytes.length);
+        Intent intent = new Intent(this,AdjustCaptureSettings.class);
+        intent.putExtra("PICTURE",picBytes);
+        startActivity(intent);
     }
 
     private void permission() {
@@ -235,6 +246,8 @@ public class ShowCameraActivity extends AppCompatActivity implements
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.i("ACT","on Activity result");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();

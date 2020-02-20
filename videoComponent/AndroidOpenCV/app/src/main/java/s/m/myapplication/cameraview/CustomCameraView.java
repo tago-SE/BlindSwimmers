@@ -14,6 +14,7 @@ import java.util.List;
 public class CustomCameraView extends JavaCameraView implements Camera.PictureCallback {
     private static final String TAG = "myCameraView";
     private String mPictureFileName;
+    private byte[] currentPic;
 
     public CustomCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -64,9 +65,10 @@ public class CustomCameraView extends JavaCameraView implements Camera.PictureCa
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        Log.i(TAG, "Saving a bitmap to file");
+        Log.i(TAG, "Saving a bitmap to file " + data.length);
         // The camera preview was automatically stopped. Start it again.
         mCamera.startPreview();
+        this.currentPic = data;
        /* mCamera.setPreviewCallback(this);
 ss
         // Write the image in a file (in jpeg format)
@@ -79,6 +81,9 @@ ss
         } catch (java.io.IOException e) {
             Log.e("PictureDemo", "Exception in photoCallback", e);
         }*/
+    }
 
+    public byte[] getCurrentPic() {
+        return currentPic;
     }
 }
