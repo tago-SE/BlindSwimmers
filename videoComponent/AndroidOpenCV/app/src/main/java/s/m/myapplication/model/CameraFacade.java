@@ -8,6 +8,7 @@ public class CameraFacade {
 
     private static final CameraFacade ourInstance = new CameraFacade();
 
+
     public static CameraFacade getInstance() {
         return ourInstance;
     }
@@ -28,6 +29,14 @@ public class CameraFacade {
 
     public void setRegionOfInterestStartPoint(int x, int y) {
         regionOfInterest.setStartPoint(x, y);
+    }
+
+    public void setLowerColorLimit(int red, int green, int blue) {
+        // TODO: Not yet implemented
+    }
+
+    public void setUpperColorLimit(int red, int green, int blue) {
+        // TODO: Not yet implemented
     }
 
 }
