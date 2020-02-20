@@ -3,8 +3,11 @@ package s.m.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 import s.m.myapplication.model.CameraFacade;
 
+import android.content.pm.ActivityInfo;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -19,8 +22,11 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
 public class MainCameraActivity extends AppCompatActivity implements
         CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener, View.OnDragListener {
@@ -34,6 +40,9 @@ public class MainCameraActivity extends AppCompatActivity implements
     private Mat mRgba;
     private Mat mRgbaF;
     private Mat mRgbaT;
+
+    private int screenWidth;
+    private int screenHeight;
 
     // Manages the configurations for the camera
     private CameraFacade camera = CameraFacade.getInstance();
@@ -63,18 +72,42 @@ public class MainCameraActivity extends AppCompatActivity implements
         Log.w(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_camera);
+        // We lock it to landscape mode so that Region Of Interest calculations are not disturbed...
+        setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        screenWidth = size.x;
+        screenHeight = size.y;
+        Log.w(TAG, "screenWidth=" + screenWidth);
+        Log.w(TAG, "screenHeight=" + screenHeight);
+
+        camera.setScreenDimensions(screenWidth, screenHeight);
+
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
         mOpenCvCameraView.setOnTouchListener(this);
     }
 
+    /**
+     * This method is invoked when camera preview has started and upon screen rotation. The frame
+     * width changes depending on if the device is in LANDS_SCAPE_MODE or PORTRAIT_MODE.
+     *
+     * @param width -  the width of the frames that will be delivered
+     * @param height - the height of the frames that will be delivered
+     */
     @Override
     public void onCameraViewStarted(int width, int height) {
+        Log.w(TAG, "onCameraViewStarted:" +
+                " width=" + width + ", height=" + height);
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mRgbaF = new Mat(height, width, CvType.CV_8UC4);
         mRgbaT = new Mat(width, width, CvType.CV_8UC4);
+        camera.setFrameDimensions(width, height);
     }
+
 
     @Override
     public void onCameraViewStopped()
@@ -85,6 +118,7 @@ public class MainCameraActivity extends AppCompatActivity implements
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
+
         switch (mOpenCvCameraView.getDisplay().getRotation()) {
             case Surface.ROTATION_0: // Vertical portrait
                 Core.transpose(mRgba, mRgbaT);
@@ -106,9 +140,14 @@ public class MainCameraActivity extends AppCompatActivity implements
         }
 
         // Render Region Of Interest
+
         Imgproc.rectangle(mRgba,
                 camera.getRegionOfInterestStartPoint(),
                 camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
+
+
+        // Rect roi = new Rect(200, 200, 400, 400);
+        // Mat cropped = new Mat(mRgba, roi);
 
         return mRgba;
     }
@@ -142,7 +181,7 @@ public class MainCameraActivity extends AppCompatActivity implements
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        Log.w(TAG, "onTouch: " + v + ", " + event.toString());
+        Log.w(TAG, "onTouch: " + v + ",  \n" + event.toString());
         camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
         return false;
     }
@@ -150,7 +189,7 @@ public class MainCameraActivity extends AppCompatActivity implements
     @Override
     public boolean onDrag(View v, DragEvent event) {
         Log.w(TAG, "onDrag: " + v + ", " + event.toString());
-        camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
+        //camera.setRegionOfInterestStartPoint((int) event.getX(), (int) event.getY());
         return false;
     }
 }

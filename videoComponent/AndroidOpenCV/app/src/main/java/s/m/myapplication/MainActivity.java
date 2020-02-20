@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toConfigCameraButton.setOnClickListener(this);
         Button toMainCameraButton = findViewById(R.id.mainCamera);
         toMainCameraButton.setOnClickListener(this);
-
     }
 
 
