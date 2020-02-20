@@ -1,5 +1,7 @@
 package s.m.myapplication.model;
 
+import android.graphics.Region;
+
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
@@ -14,7 +16,6 @@ public class CameraFacade {
 
     private int frameScreenHeightDiff;
     private int frameScreenWidthDiff;
-    private int minX, maxX, minY, maxY;
 
     public static CameraFacade getInstance() {
         return ourInstance;
@@ -32,6 +33,24 @@ public class CameraFacade {
 
     public Point getRegionOfInterestEndPoint() {
         return regionOfInterest.getEndPoint();
+    }
+
+    public int getROIWidth() {
+        return regionOfInterest.getWidth();
+    }
+
+    public int getROIHeight() {
+        return regionOfInterest.getHeight();
+    }
+
+    public void setROIWidth(int w) {
+        regionOfInterest.setWidth(w);
+        onDimensionChange();
+    }
+
+    public void setROIHeight(int h) {
+        regionOfInterest.setHeight(h);
+        onDimensionChange();
     }
 
     public void setRegionOfInterestStartPoint(int x, int y) {
@@ -72,13 +91,15 @@ public class CameraFacade {
         onDimensionChange();
     }
 
+
+
     private void onDimensionChange() {
         frameScreenWidthDiff = Math.abs(screenRect.width/2 - frameRect.width/2);
         frameScreenHeightDiff = Math.abs(screenRect.height/2 - frameRect.height/2);
         frameRect.x = frameScreenWidthDiff;
         frameRect.y = frameScreenHeightDiff;
-        minX = frameScreenWidthDiff;
-        maxX = frameScreenWidthDiff + frameRect.width - regionOfInterest.getWidth()/2;
+       // minX = frameScreenWidthDiff;
+        //maxX = frameScreenWidthDiff + frameRect.width - regionOfInterest.getWidth()/2;
     }
 
 }
