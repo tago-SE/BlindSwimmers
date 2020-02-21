@@ -65,7 +65,7 @@ public class CustomCameraView extends JavaCameraView implements Camera.PictureCa
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        Log.i(TAG, "Saving a bitmap to file " + data.length);
+        Log.i(TAG, "Saving a bitmap to file " );
         // The camera preview was automatically stopped. Start it again.
         mCamera.startPreview();
         this.currentPic = data;

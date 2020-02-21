@@ -134,7 +134,7 @@ public class ShowCameraActivity extends AppCompatActivity implements
 
     private void gotoAdjustCaptureSettings() {
         mOpenCvCameraView.disableView();
-        Log.d("ADJ","Going to A new activity " + picBytes.length);
+        Log.d("ADJ","Going to A new activity ");
         Intent intent = new Intent(this,AdjustCaptureSettings.class);
         intent.putExtra("PICTURE",picBytes);
         startActivity(intent);

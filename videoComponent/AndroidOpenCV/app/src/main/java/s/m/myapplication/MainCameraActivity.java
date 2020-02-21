@@ -53,6 +53,9 @@ public class MainCameraActivity extends AppCompatActivity implements
     private Mat mRgbaT;
 
 
+    private Mat mHsv;
+    private Mat mask;
+
     // Manages the configurations for the camera
     private CameraFacade camera = CameraFacade.getInstance();
 
@@ -142,7 +145,13 @@ public class MainCameraActivity extends AppCompatActivity implements
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mRgbaF = new Mat(height, width, CvType.CV_8UC4);
         mRgbaT = new Mat(width, width, CvType.CV_8UC4);
+
+
+        mHsv = new Mat(width, height, CvType.CV_8UC1);
+        mask = new Mat(width, height, CvType.CV_8UC1);
+        //mHsv = new Mat(width, height, CvType.CV_8UC1);
         camera.setFrameDimensions(width, height);
+
     }
 
 
@@ -154,9 +163,11 @@ public class MainCameraActivity extends AppCompatActivity implements
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mRgba = inputFrame.rgba();
 
-        switch (mOpenCvCameraView.getDisplay().getRotation()) {
+        mRgba = inputFrame.rgba();
+        Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGB2HSV);
+        ////////
+       /* switch (mOpenCvCameraView.getDisplay().getRotation()) {
             case Surface.ROTATION_0: // Vertical portrait
                 Core.transpose(mRgba, mRgbaT);
                 Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
@@ -174,19 +185,20 @@ public class MainCameraActivity extends AppCompatActivity implements
                 Core.flip(mRgbaF, mRgba, -1);
                 break;
             default:
-        }
+        }*/
 
-        // Render Region Of Interest
-
-        Imgproc.rectangle(mRgba,
+        // Render Region Of Interest Imgproc.cvtColor(mRgba,mRgba,0);
+       /* Imgproc.rectangle(mRgba,
                 camera.getRegionOfInterestStartPoint(),
                 camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
 
-
+ */
         // Rect roi = new Rect(200, 200, 400, 400);
         // Mat cropped = new Mat(mRgba, roi);
-
-        return mRgba;
+        Scalar scalarLow = new Scalar(35,20,10);
+        Scalar scalarHigh = new Scalar(75,255,255);
+        Core.inRange(mHsv,scalarLow,scalarHigh,mask);
+        return mask;
     }
 
     @Override
