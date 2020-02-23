@@ -1,6 +1,7 @@
 package s.m.myapplication.model;
 
 import android.graphics.Region;
+import android.util.Log;
 
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -16,6 +17,9 @@ public class CameraFacade {
 
     private int frameScreenHeightDiff;
     private int frameScreenWidthDiff;
+
+    private RGBColor lowerColor = new RGBColor();
+    private RGBColor upperColor = new RGBColor();
 
     public static CameraFacade getInstance() {
         return ourInstance;
@@ -71,12 +75,22 @@ public class CameraFacade {
         regionOfInterest.setStartPoint(newX, newY);
     }
 
-    public void setLowerColorLimit(int red, int green, int blue) {
-        // TODO: Not yet implemented
+    public void setLowerColorLimit(int color) {
+        lowerColor = new RGBColor(color);
+        Log.w(TAG, "upperColorLimit: " + lowerColor.toString());
     }
 
-    public void setUpperColorLimit(int red, int green, int blue) {
-        // TODO: Not yet implemented
+    public void setUpperColorLimit(int color) {
+        upperColor = new RGBColor(color);
+        Log.w(TAG, "upperColorLimit: " + upperColor.toString());
+    }
+
+    public String getLowerColorLimitHex() {
+        return lowerColor.getHex();
+    }
+
+    public String getUpperColorLimitHex() {
+        return upperColor.getHex();
     }
 
     public void setFrameDimensions(int width, int height) {
