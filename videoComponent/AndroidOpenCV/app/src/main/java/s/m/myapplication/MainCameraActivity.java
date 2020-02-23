@@ -2,21 +2,18 @@ package s.m.myapplication;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.GestureDetectorCompat;
 import s.m.myapplication.model.CameraFacade;
+import top.defaults.colorpicker.ColorPickerPopup;
 
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
-import android.view.DragEvent;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
@@ -34,10 +31,8 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import org.w3c.dom.Text;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
@@ -61,8 +56,12 @@ public class MainCameraActivity extends AppCompatActivity implements
     private Mat mRgbaT;
 
     private Button resizeButton;
+    private Button colorHighButton;
+    private Button colorLowButton;
     private int screenWidth;
     private int screenHeight;
+
+    private final Context context = this;
 
     // Manages the configurations for the camera
     private CameraFacade camera = CameraFacade.getInstance();
@@ -115,10 +114,57 @@ public class MainCameraActivity extends AppCompatActivity implements
                 showTextDialog();
             }
         });
+        colorHighButton = findViewById(R.id.colorHighButton);
+        colorHighButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showColorPicker(v);
+            }
+        });
+        colorLowButton = findViewById(R.id.colorLowButton);
+        colorLowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showColorPicker(v);
+            }
+        });
     }
 
-    private void showTextDialog()
-    {
+    private void showColorPicker(final View v) {
+        String hex = null;
+        if (v.equals(colorHighButton)) {
+            hex = camera.getUpperColorLimitHex();
+        } else if (v.equals(colorLowButton)) {
+            hex = camera.getLowerColorLimitHex();
+        }
+        int color = Color.parseColor(hex);
+        new ColorPickerPopup.Builder(context)
+                .initialColor(color)
+                .enableBrightness(false) // Enable brightness slider or not
+                .enableAlpha(false)     // Enable alpha slider or not
+                .okTitle(getString(android.R.string.yes))
+                .cancelTitle(getString(android.R.string.no))
+                .showIndicator(true)
+                .showValue(false)
+                .build()
+                .show(v, new ColorPickerPopup.ColorPickerObserver() {
+                    @Override
+                    public void onColorPicked(int color) {
+                        if (v.equals(colorHighButton)) {
+                            camera.setUpperColorLimit(color);
+                        } else if (v.equals(colorLowButton)) {
+                            camera.setLowerColorLimit(color);
+                        }
+                    }
+
+                    @Override
+                    public void onColor(int color, boolean fromUser) {
+                        // Not sure, who cares
+                    }
+                });
+    }
+
+    private void showTextDialog() {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
 
