@@ -50,6 +50,14 @@ public class RGBColor {
         blue = Integer.valueOf(hexColor.substring(5, 7), 16);
     }
 
+    public int[] getRGB() {
+        int[] rgb = new int[3];
+        rgb[0] = red;
+        rgb[1] = green;
+        rgb[2] = blue;
+        return rgb;
+    }
+
     public int getRed() {
         return red;
     }

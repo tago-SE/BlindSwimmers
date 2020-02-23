@@ -307,10 +307,23 @@ public class MainCameraActivity extends AppCompatActivity implements
         Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGB2HSV);
         Log.i("ARR","From " + selectedX + " " + selectedY);
         Log.i("ARR","From mRgba " + Arrays.toString(mRgba.get((int)selectedX,(int)selectedY)));
+
+
         Scalar scalarLow = new Scalar(35,20,10);
         Scalar scalarHigh = new Scalar(75,255,255);
-        Core.inRange(mHsv,scalarLow,scalarHigh,mask);
-        return mRgba;
+        Core.inRange(mHsv, getLowerScalar(), getHighScalar(), mask);
+        //return mRgba;
+        return mask;
+    }
+
+    private Scalar getLowerScalar() {
+        int[] rgb = camera.getLowerRGB();
+        return new Scalar(rgb[0], rgb[1], rgb[2]);
+    }
+
+    public Scalar getHighScalar() {
+        int[] rgb = camera.getUpperRGB();
+        return new Scalar(rgb[0], rgb[1], rgb[2]);
     }
 
     @Override

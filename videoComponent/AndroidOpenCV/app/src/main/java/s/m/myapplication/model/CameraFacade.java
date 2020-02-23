@@ -93,6 +93,14 @@ public class CameraFacade {
         return upperColor.getHex();
     }
 
+    public int[] getUpperRGB() {
+        return upperColor.getRGB();
+    }
+
+    public int[] getLowerRGB() {
+        return lowerColor.getRGB();
+    }
+
     public void setFrameDimensions(int width, int height) {
         frameRect.width = width;
         frameRect.height = height;
