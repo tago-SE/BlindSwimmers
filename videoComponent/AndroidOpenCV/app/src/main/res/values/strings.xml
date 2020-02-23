@@ -4,4 +4,7 @@
     <string name="configCameraButtonText">Config Camera</string>
     <string name="mainCameraButtonText">Main Camera</string>
     <string name="directToAdjust">Adjust Picture Settings</string>
+    <string name="resizeButtonText">Resize</string>
+    <string name="colorLower">Color Low</string>
+    <string name="colorHigher">Color High</string>
 </resources>

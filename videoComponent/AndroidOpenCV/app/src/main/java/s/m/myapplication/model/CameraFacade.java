@@ -1,5 +1,8 @@
 package s.m.myapplication.model;
 
+import android.graphics.Region;
+import android.util.Log;
+
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
@@ -14,7 +17,9 @@ public class CameraFacade {
 
     private int frameScreenHeightDiff;
     private int frameScreenWidthDiff;
-    private int minX, maxX, minY, maxY;
+
+    private RGBColor lowerColor = new RGBColor();
+    private RGBColor upperColor = new RGBColor();
 
     public static CameraFacade getInstance() {
         return ourInstance;
@@ -32,6 +37,24 @@ public class CameraFacade {
 
     public Point getRegionOfInterestEndPoint() {
         return regionOfInterest.getEndPoint();
+    }
+
+    public int getROIWidth() {
+        return regionOfInterest.getWidth();
+    }
+
+    public int getROIHeight() {
+        return regionOfInterest.getHeight();
+    }
+
+    public void setROIWidth(int w) {
+        regionOfInterest.setWidth(w);
+        onDimensionChange();
+    }
+
+    public void setROIHeight(int h) {
+        regionOfInterest.setHeight(h);
+        onDimensionChange();
     }
 
     public void setRegionOfInterestStartPoint(int x, int y) {
@@ -52,12 +75,22 @@ public class CameraFacade {
         regionOfInterest.setStartPoint(newX, newY);
     }
 
-    public void setLowerColorLimit(int red, int green, int blue) {
-        // TODO: Not yet implemented
+    public void setLowerColorLimit(int color) {
+        lowerColor = new RGBColor(color);
+        Log.w(TAG, "upperColorLimit: " + lowerColor.toString());
     }
 
-    public void setUpperColorLimit(int red, int green, int blue) {
-        // TODO: Not yet implemented
+    public void setUpperColorLimit(int color) {
+        upperColor = new RGBColor(color);
+        Log.w(TAG, "upperColorLimit: " + upperColor.toString());
+    }
+
+    public String getLowerColorLimitHex() {
+        return lowerColor.getHex();
+    }
+
+    public String getUpperColorLimitHex() {
+        return upperColor.getHex();
     }
 
     public void setFrameDimensions(int width, int height) {
@@ -72,13 +105,15 @@ public class CameraFacade {
         onDimensionChange();
     }
 
+
+
     private void onDimensionChange() {
         frameScreenWidthDiff = Math.abs(screenRect.width/2 - frameRect.width/2);
         frameScreenHeightDiff = Math.abs(screenRect.height/2 - frameRect.height/2);
         frameRect.x = frameScreenWidthDiff;
         frameRect.y = frameScreenHeightDiff;
-        minX = frameScreenWidthDiff;
-        maxX = frameScreenWidthDiff + frameRect.width - regionOfInterest.getWidth()/2;
+       // minX = frameScreenWidthDiff;
+        //maxX = frameScreenWidthDiff + frameRect.width - regionOfInterest.getWidth()/2;
     }
 
 }
