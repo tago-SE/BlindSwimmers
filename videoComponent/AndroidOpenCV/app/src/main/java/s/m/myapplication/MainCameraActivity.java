@@ -6,6 +6,7 @@ import androidx.core.view.GestureDetectorCompat;
 import s.m.myapplication.model.CameraFacade;
 
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,6 +31,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.Arrays;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
@@ -58,6 +61,9 @@ public class MainCameraActivity extends AppCompatActivity implements
 
     // Manages the configurations for the camera
     private CameraFacade camera = CameraFacade.getInstance();
+
+    private double selectedX;
+    private double selectedY;
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this)
     {
@@ -110,6 +116,8 @@ public class MainCameraActivity extends AppCompatActivity implements
         switch(action) {
             case MotionEvent.ACTION_DOWN:
                 Log.w(TAG, "onTouchEvent:ACTION_DOWN");
+                selectedX = event.getX();
+                selectedY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.w(TAG, "onTouchEvent:ACTION_MOVE");
@@ -124,7 +132,6 @@ public class MainCameraActivity extends AppCompatActivity implements
     }
 
     /*
-
     @Override
     public boolean onTouch(View v, MotionEvent e) {
         Log.w(TAG, "onTouch: " + v + ",  \n" + e.toString());
@@ -166,39 +173,12 @@ public class MainCameraActivity extends AppCompatActivity implements
 
         mRgba = inputFrame.rgba();
         Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGB2HSV);
-        ////////
-       /* switch (mOpenCvCameraView.getDisplay().getRotation()) {
-            case Surface.ROTATION_0: // Vertical portrait
-                Core.transpose(mRgba, mRgbaT);
-                Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
-                Core.flip(mRgbaF, mRgba, 1);
-                break;
-            case Surface.ROTATION_90: // 90° anti-clockwise
-                break;
-            case Surface.ROTATION_180: // Vertical anti-portrait
-                Core.transpose(mRgba, mRgbaT);
-                Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
-                Core.flip(mRgbaF, mRgba, 0);
-                break;
-            case Surface.ROTATION_270: // 90° clockwise
-                Imgproc.resize(mRgba, mRgbaF, mRgbaF.size(), 0,0, 0);
-                Core.flip(mRgbaF, mRgba, -1);
-                break;
-            default:
-        }*/
-
-        // Render Region Of Interest Imgproc.cvtColor(mRgba,mRgba,0);
-       /* Imgproc.rectangle(mRgba,
-                camera.getRegionOfInterestStartPoint(),
-                camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
-
- */
-        // Rect roi = new Rect(200, 200, 400, 400);
-        // Mat cropped = new Mat(mRgba, roi);
+        Log.i("ARR","From " + selectedX + " " + selectedY);
+        Log.i("ARR","From mRgba " + Arrays.toString(mRgba.get((int)selectedX,(int)selectedY)));
         Scalar scalarLow = new Scalar(35,20,10);
         Scalar scalarHigh = new Scalar(75,255,255);
         Core.inRange(mHsv,scalarLow,scalarHigh,mask);
-        return mask;
+        return mRgba;
     }
 
     @Override
@@ -229,3 +209,22 @@ public class MainCameraActivity extends AppCompatActivity implements
     }
 
 }
+
+ /*   array = mRgba.get((int)selectedX,(int)selectedY);
+           Log.i("ARR",Arrays.toString(array));
+           /*
+             lower_blue = np.array([100,50,50])
+             upper_blue = np.array([130,255,255])
+
+              scalarLow  = new Scalar(array[0]-75,array[1]-75,array[2]-75);
+           scalarHigh = new Scalar(array[0]+75,array[1]+75,array[2]-75);
+
+            upper =  np.array([pixel[0] + 10, pixel[1] + 10, pixel[2] + 40])
+        lower =  np.array([pixel[0] - 10, pixel[1] - 10, pixel[2] - 40])
+            */
+           /*scalarLow  = new Scalar(array[0]-10,array[1]-10,array[2]-40);
+           scalarHigh = new Scalar(array[0]+10,array[1]+10,array[2]+40);
+           Core.inRange(mHsv,scalarLow,scalarHigh,mask);
+           isPixelTouched = false;
+           keepTouched = true;
+           return mask;*/
