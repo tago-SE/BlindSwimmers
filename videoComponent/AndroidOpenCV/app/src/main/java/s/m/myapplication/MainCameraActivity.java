@@ -33,6 +33,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -47,7 +48,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
  *  https://www.techotopia.com/index.php/Android_Pinch_Gesture_Detection_Tutorial_using_Android_Studio
  */
 public class MainCameraActivity extends AppCompatActivity implements
-        CameraBridgeViewBase.CvCameraViewListener2 {
+        CameraBridgeViewBase.CvCameraViewListener2,CameraBridgeViewBase.OnTouchListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -75,6 +76,17 @@ public class MainCameraActivity extends AppCompatActivity implements
 
     private double selectedX;
     private double selectedY;
+
+    private double x = -1;
+    private double y = -1;
+
+    private Scalar mBlobColorHsv;
+    private Scalar mBlobColorRgba;
+
+
+    private  TextView touch_coordinates;
+    private  TextView touch_color;
+
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this)
     {
@@ -117,6 +129,7 @@ public class MainCameraActivity extends AppCompatActivity implements
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setOnTouchListener(this);
         resizeButton = findViewById(R.id.resizeButton);
         resizeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,6 +151,10 @@ public class MainCameraActivity extends AppCompatActivity implements
                 showColorPicker(v);
             }
         });
+
+
+        touch_coordinates = (TextView) findViewById(R.id.touch_coordinates);
+        touch_color = (TextView) findViewById(R.id.touch_color);
     }
 
     private void showColorPicker(final View v) {
@@ -299,8 +316,11 @@ public class MainCameraActivity extends AppCompatActivity implements
                 break;
             default:
         }
+
+        
+
         // Render Region Of Interest
-        Imgproc.rectangle(mRgba,
+        /*Imgproc.rectangle(mRgba,
                 camera.getRegionOfInterestStartPoint(),
                 camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
 
@@ -312,8 +332,10 @@ public class MainCameraActivity extends AppCompatActivity implements
         Scalar scalarLow = new Scalar(35,20,10);
         Scalar scalarHigh = new Scalar(75,255,255);
         Core.inRange(mHsv, getLowerScalar(), getHighScalar(), mask);
-        //return mRgba;
-        return mask;
+        return mRgba;*/
+        getLowerScalar();
+        getHighScalar();
+        return mRgba;
     }
 
     private Scalar getLowerScalar() {
@@ -353,6 +375,82 @@ public class MainCameraActivity extends AppCompatActivity implements
             mOpenCvCameraView.disableView();
     }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        Log.i("TOUCH", "on onTouch");
+
+        int cols = mRgba.cols();
+        int rows = mRgba.rows();
+
+
+        double yLow = (double)mOpenCvCameraView.getHeight() * 0.2401961;
+        double yHigh = (double)mOpenCvCameraView.getHeight() * 0.7696078;
+
+        double xScale = (double)cols / (double)mOpenCvCameraView.getWidth();
+        double yScale = (double)rows / (yHigh - yLow);
+
+        x = motionEvent.getX();
+        y = motionEvent.getY();
+
+
+        y = y - yLow;
+
+        x = x * xScale;
+        y = y * yScale;
+
+
+        if((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
+
+        touch_coordinates.setText("X: " + Double.valueOf(x) + ", Y: " + Double.valueOf(y));
+
+
+        Rect touchedRect = new Rect();
+
+        touchedRect.x = (int)x;
+        touchedRect.y = (int)y;
+
+        touchedRect.width = 8;
+        touchedRect.height = 8;
+
+        Mat touchedRegionRgba = mRgba.submat(touchedRect);
+
+        Mat touchedRegionHsv = new Mat();
+        Imgproc.cvtColor(touchedRegionRgba, touchedRegionHsv, Imgproc.COLOR_RGB2HSV_FULL);
+
+        mBlobColorHsv = Core.sumElems(touchedRegionHsv);
+        int pointCount = touchedRect.width * touchedRect.height;
+
+
+        for (int i = 0; i < mBlobColorHsv.val.length; i++)
+            mBlobColorHsv.val[i] /= pointCount;
+
+        mBlobColorRgba = convertScalarHsv2Rgba(mBlobColorHsv);
+
+
+        touch_color.setText("Color: #" + String.format("%02X", (int)mBlobColorRgba.val[0])
+                + String.format("%02X", (int)mBlobColorRgba.val[1])
+                + String.format("%02X", (int)mBlobColorRgba.val[2]));
+
+        touch_color.setTextColor(Color.rgb((int) mBlobColorRgba.val[0],
+                (int) mBlobColorRgba.val[1],
+                (int) mBlobColorRgba.val[2]));
+        touch_coordinates.setTextColor(Color.rgb((int)mBlobColorRgba.val[0],
+                (int)mBlobColorRgba.val[1],
+                (int)mBlobColorRgba.val[2]));
+
+
+
+        return false;
+    }
+
+    private Scalar convertScalarHsv2Rgba(Scalar hsvColor) {
+        Mat pointMatRgba = new Mat();
+        Mat pointMatHsv = new Mat(1, 1, CvType.CV_8UC3, hsvColor);
+        Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_HSV2RGB_FULL, 4);
+
+        return new Scalar(pointMatRgba.get(0, 0));
+    }
 }
 
  /*   array = mRgba.get((int)selectedX,(int)selectedY);
