@@ -297,6 +297,7 @@ public class MainCameraActivity extends AppCompatActivity implements
 
         mRgba = inputFrame.rgba();
 
+
         switch (mOpenCvCameraView.getDisplay().getRotation()) {
             case Surface.ROTATION_0: // Vertical portrait
                 Core.transpose(mRgba, mRgbaT);
@@ -317,7 +318,7 @@ public class MainCameraActivity extends AppCompatActivity implements
             default:
         }
 
-        
+
 
         // Render Region Of Interest
         /*Imgproc.rectangle(mRgba,
@@ -432,6 +433,8 @@ public class MainCameraActivity extends AppCompatActivity implements
                 + String.format("%02X", (int)mBlobColorRgba.val[1])
                 + String.format("%02X", (int)mBlobColorRgba.val[2]));
 
+
+        Log.i("COLOR","The color " + mBlobColorRgba.val[0]);
         touch_color.setTextColor(Color.rgb((int) mBlobColorRgba.val[0],
                 (int) mBlobColorRgba.val[1],
                 (int) mBlobColorRgba.val[2]));

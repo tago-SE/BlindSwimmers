@@ -120,7 +120,7 @@ public class CameraFacade {
         frameScreenHeightDiff = Math.abs(screenRect.height/2 - frameRect.height/2);
         frameRect.x = frameScreenWidthDiff;
         frameRect.y = frameScreenHeightDiff;
-       // minX = frameScreenWidthDiff;
+        //minX = frameScreenWidthDiff;
         //maxX = frameScreenWidthDiff + frameRect.width - regionOfInterest.getWidth()/2;
     }
 
