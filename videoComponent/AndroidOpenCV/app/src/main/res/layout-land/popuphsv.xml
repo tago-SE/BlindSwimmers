@@ -24,10 +24,11 @@
             android:text="@string/hue" />
 
         <SeekBar
-            android:id="@+id/seekBar2"
+            android:id="@+id/HueSeekId"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
             android:visibility="visible"
+            android:max="255"
             />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

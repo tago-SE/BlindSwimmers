@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 
 public class CameraFacade {
 
@@ -20,6 +21,9 @@ public class CameraFacade {
 
     private RGBColor lowerColor = new RGBColor();
     private RGBColor upperColor = new RGBColor();
+
+    private RGBColor lowerHSV = new RGBColor();
+    private RGBColor higherHSV = new RGBColor();
 
     public static CameraFacade getInstance() {
         return ourInstance;
@@ -46,6 +50,8 @@ public class CameraFacade {
     public int getROIHeight() {
         return regionOfInterest.getHeight();
     }
+
+    private boolean visionIsBlackWhite;
 
     public void setROIWidth(int w) {
         regionOfInterest.setWidth(w);
@@ -124,4 +130,41 @@ public class CameraFacade {
         //maxX = frameScreenWidthDiff + frameRect.width - regionOfInterest.getWidth()/2;
     }
 
+    public boolean isVisionIsBlackWhite() {
+        return visionIsBlackWhite;
+    }
+
+    public void setVisionIsBlackWhite(boolean visionIsBlackWhite) {
+        this.visionIsBlackWhite = visionIsBlackWhite;
+    }
+
+    public void fillScalar(Scalar scalar){
+        this.lowerColor.setRed ((int)scalar.val[0]-5);
+        this.lowerColor.setBlue((int)scalar.val[1]-5);
+        this.lowerColor.setGreen((int)scalar.val[2]-10);
+
+        this.upperColor.setRed((int)scalar.val[0]+5);
+        this.upperColor.setBlue((int)scalar.val[1]+5);
+        this.upperColor.setGreen((int)scalar.val[2]+10);
+    }
+
+    public RGBColor getLowerHSV() {
+        return lowerHSV;
+    }
+
+    public Scalar getScalarLowerHSV(){
+        int [] hsv = this.lowerHSV.getHSV();
+        return new Scalar(hsv[0],hsv[1],hsv[2]);
+    }
+    public Scalar getScalarHigher(){
+        int [] hsv = this.higherHSV.getHSV();
+        return new Scalar(hsv[0],hsv[1],hsv[2]);
+    }
+
+
+    public void setHSV(Scalar mBlobColorHsv) {
+        this.lowerHSV.setHue((int)mBlobColorHsv.val[0]);
+        this.lowerHSV.setSaturation((int)mBlobColorHsv.val[1]);
+        this.lowerHSV.setValue((int)mBlobColorHsv.val[2]);
+    }
 }
