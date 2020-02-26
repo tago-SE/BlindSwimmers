@@ -43,6 +43,7 @@ void runningModeLoop()
     //Serial.println("near edge loop..");
     nearEdgeLoopValueRunning = nearEdgeLoopValueMAXRunning;
     
+    
     //check if time to turn-around
     if(isNearEdge())
     {

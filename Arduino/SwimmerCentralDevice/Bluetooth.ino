@@ -46,6 +46,9 @@ void BLEInit()
 
   //egen test för notify
   switchCharacteristic.setEventHandler(BLENotify, switchCharacteristicNotify);
+
+  // set the discovered event handle (used for scanning in training and running mode)
+  BLE.setEventHandler(BLEDiscovered, bleCentralDiscoverHandler);
   
   // set an initial value for the characteristic
   switchCharacteristic.setValue("Arduino Swimmer 1 message");
@@ -199,6 +202,7 @@ void handleAppSentMessage(String str)
   {
     str = str.substring(9);
     timeStamp = str.toInt();
+    startMillis = millis();
   }
   //button pressed on app to turn now
   else if(str.startsWith("T"))
@@ -212,6 +216,16 @@ void handleAppSentMessage(String str)
       Serial.println("Clear SD Card");
     }
     clearSDCard();
+  }
+  //NOT IMPLEMENTED IN APP
+  else if(str.startsWith("SET_RSSI_THRESHOLD"))
+  {
+    str = str.substring(18);
+    if(dedugging)
+    {
+      Serial.println("setting rssi threshold");
+    }
+    rssiThresholdValue = str.toInt();
   }
   else
   {

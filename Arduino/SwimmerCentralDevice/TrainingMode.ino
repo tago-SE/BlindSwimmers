@@ -18,6 +18,7 @@ void trainingModeLoop()
 {
   // poll the central for events
   //BLE.poll();
+  digitalWrite(ledPin, LOW);
 
   //looping for restart scanning
   if(restartLoopValueTraining == 0)
@@ -95,12 +96,12 @@ void handlePeripheralDeviceTraining(BLEDevice peripheral)
   String sensorId = peripheral.localName();
   int rssiValue = peripheral.rssi();
   int averageRSSIValue = getAverageRSSI(peripheral.rssi(), peripheral.localName());
-  long timeValue = 1000; //NOT IMPLEMENTED YET!!
+  long timeValue = timeStamp + (millis() - startMillis);
   bool turnButtonPressed = turnButtonIsPressed;
 
   //save to SD-Card
   String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonPressed;
-  //writeLine(strToSD);
+  //writeToFileWrapper(strToSD);
 
   //if turn button is pressed on app, set to false
   if(connectedToDevice)

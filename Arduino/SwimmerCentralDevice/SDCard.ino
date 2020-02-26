@@ -1,59 +1,96 @@
 
 File myFile;
 
-void writeToSDCard()
+String TEST_DATA_FILE = "testdata.txt";
+String TEST_DATA_HEADER = "id\trssi\trssi_avg\ttime\tturn\t"; 
+
+/**
+ * Initializes the SD card
+ */
+void initSD()
 {
-  //if turn button is pressed
-  if(connectedToDevice)
+  if(dedugging)
   {
+    Serial.print("Initializing SD card...");
+  }
     
+  if (!SD.begin(4))
+  {
+      Serial.println("initialization failed!");
+      while (1);  // Failed
+  }
+  
+  if(dedugging)
+  {
+    Serial.println("initialization done.");
+  }
+    
+}
+
+/**
+ * Appends a line to a given filename.
+ * Example filename: "test.txt".
+ * Example line: "Hello there"
+ */
+void writeLineToFile(String filename, String line)
+{
+  if (!SD.begin(4))
+  {
+      Serial.println("initialization failed!");
+      while (1);  // Failed
+  }
+    
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  myFile = SD.open(filename, FILE_WRITE);
+  if (myFile)
+  {
+    if(dedugging)
+    {
+      Serial.println(filename + " wrote: " + line);
+    }
+    myFile.println(line);
+    myFile.close();
   }
   else
   {
-    
-  }
-
-  Serial.print("Initializing SD card...");
-
-  if (!SD.begin(4)) {
-    Serial.println("initialization failed!");
-    while (1);
-  }
-  Serial.println("initialization done.");
-
-  // open the file. note that only one file can be open at a time,
-  // so you have to close this one before opening another.
-  myFile = SD.open("test.txt", FILE_WRITE);
-
-  // if the file opened okay, write to it:
-  if (myFile) {
-    Serial.print("Writing to test.txt...");
-    myFile.println("testing 1, 2, 3.");
-    // close the file:
-    myFile.close();
-    Serial.println("done.");
-  } else {
-    // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
-  }
-
-  // re-open the file for reading:
-  myFile = SD.open("test.txt");
-  if (myFile) {
-    Serial.println("test.txt:");
-
-    // read from the file until there's nothing else in it:
-    while (myFile.available()) {
-      Serial.write(myFile.read());
+    if(dedugging)
+    {
+      Serial.print("error opening: ");
+      Serial.println(filename);
     }
-    // close the file:
-    myFile.close();
-  } else {
-    // if the file didn't open, print an error:
-    Serial.println("error opening test.txt");
   }
+}
 
-  
+void writeToFileWrapper(String line) 
+{
+   writeLineToFile(TEST_DATA_FILE, line);
+}
+
+/**
+ * Removes the file
+ */
+void clearFile(String filename)
+{
+    if (!SD.begin(4))
+    {
+        Serial.println("initialization failed!");
+        while (1);  // Failed
+    }
+    if(dedugging)
+    {
+      Serial.println(filename + " cleared");
+    }
+    if (SD.exists(filename))
+    {
+        SD.remove(filename);
+    }
+}
+
+void clearFileWrapper()
+{
+  clearFile(TEST_DATA_FILE);
+  writeLineToFile(TEST_DATA_FILE, TEST_DATA_HEADER); // rewrite header
 }
 
 void clearSDCard()

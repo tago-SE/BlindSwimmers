@@ -69,7 +69,8 @@ int getAverageRSSI(int rssi, String id)
     if (devices[i].id == id)
     {
       devices[i].addRSSI(rssi);
-      return devices[i].getAverageRSSI();
+      avgRSSI = devices[i].getAverageRSSI();
+      return avgRSSI;
     }
   }
   if (devices_size >= MAX_DEVICES) {

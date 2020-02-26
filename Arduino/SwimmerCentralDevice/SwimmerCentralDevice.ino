@@ -43,9 +43,13 @@ int loopingMode;
 
 //timeStamp in long, sent from app when device is first connected
 long timeStamp;
+long startMillis;
 
 //used in training mode, app presses button to turn
 bool turnButtonIsPressed;
+
+//value for turn value
+int rssiThresholdValue;
 
 /**
  * Init
@@ -58,12 +62,15 @@ void setup() {
     while (!Serial);
   }
   
-
+  //Bluetooth init
   BLEInit();
 
+
+  //Set sensorname
   sensorArray[0] = "SimplePeripheral";
   sensorArray[1] = "SimpleBLEBroadcaster";
 
+  //print sensorname
   if(dedugging)
   {
     //prints number of sensors and there name
@@ -78,8 +85,7 @@ void setup() {
     }
   }
 
-  // set the discovered event handle (used for scanning in training and running mode)
-  BLE.setEventHandler(BLEDiscovered, bleCentralDiscoverHandler);
+  
 
   digitalWrite(ledPin, LOW);
   //==============================================================================
@@ -93,6 +99,8 @@ void setup() {
   timeStamp = 0;
 
   turnButtonIsPressed = false;
+
+  rssiThresholdValue = -65;
 
   // start scanning for peripherals with duplicates
   //BLE.scanForName("SimplePeripheral"); 
@@ -202,7 +210,10 @@ bool isNearEdge()
   }
   */
 
-  if(getLastAverageRSSIValue() > -65)
+  int tmp = getLastAverageRSSIValue();
+  Serial.print("tmp = ");
+  Serial.println(tmp);
+  if(tmp > rssiThresholdValue)
   {
     //Serial.println("NOW");
     return true;
