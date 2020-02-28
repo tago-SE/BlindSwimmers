@@ -8,6 +8,8 @@ BLECharacteristic switchCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", B
 
 bool connectedToDevice;
 
+bool saveDataPauseResume = true;
+
 //char array of received data
 int const receivedBytesArraySize = 30;
 char receivedBytesArray [receivedBytesArraySize];
@@ -200,24 +202,42 @@ void handleAppSentMessage(String str)
   //set the timeStamp from app
   else if(str.startsWith("TS_"))
   {
-    str = str.substring(9);
+    str = str.substring(3);
     timeStamp = str.toInt();
     startMillis = millis();
+    //if(dedugging)
+    //{
+      //Serial.print("  timeStamp: ");
+      //Serial.println(timeStamp);
+
+      //Serial.print("  startMillis: ");
+      //Serial.println(startMillis);
+
+      //long timeValue = timeStamp + (millis() - startMillis);
+
+      //Serial.print("  timeValue: ");
+      //Serial.println(timeValue);
+      
+    //}
   }
   //button pressed on app to turn now
   else if(str.startsWith("T"))
   {
     turnButtonIsPressed = true;
+    String turn = "TURN";
+    long timeLongString = /* timeStamp + */(millis() - startMillis);
+    String turnString = turn + "\t" + timeLongString;
+    writeToFileWrapper(turnString);
   }
   else if(str.startsWith("SD_CLEAR"))
   {
     if(dedugging)
     {
-      Serial.println("Clear SD Card");
+      Serial.println("SD-Card closing");
     }
-    clearSDCard();
+    closeWrapper();
+    //clearSDCard();
   }
-  //NOT IMPLEMENTED IN APP
   else if(str.startsWith("SET_RSSI_THRESHOLD"))
   {
     str = str.substring(18);
@@ -226,6 +246,23 @@ void handleAppSentMessage(String str)
       Serial.println("setting rssi threshold");
     }
     rssiThresholdValue = str.toInt();
+  }
+  else if(str.startsWith("HEADER_MSG"))
+  {
+    str = str.substring(10);
+    writeToFileWrapper(str);
+  }
+  else if(str.startsWith("PAUSE"))
+  {
+    saveDataPauseResume = false;
+    Serial.print("Pausing scanning and saving data to SD-Card");
+    writeToFileWrapper("PAUSE");
+  }
+  else if(str.startsWith("RESUME"))
+  {
+    saveDataPauseResume = true;
+    Serial.print("Resuming scanning and saving data to SD-Card");
+    writeToFileWrapper("RESUME");
   }
   else
   {

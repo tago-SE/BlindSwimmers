@@ -54,8 +54,9 @@ int rssiThresholdValue;
 /**
  * Init
  */
-void setup() {
-  Serial.begin(9600);
+void setup()
+{
+  Serial.begin(115200);
   if(dedugging)
   {
     //wait till serial monitor is on
@@ -67,8 +68,8 @@ void setup() {
 
 
   //Set sensorname
-  sensorArray[0] = "SimplePeripheral";
-  sensorArray[1] = "SimpleBLEBroadcaster";
+  sensorArray[0] = "S1";
+  sensorArray[1] = "S2";
 
   //print sensorname
   if(dedugging)
@@ -101,6 +102,8 @@ void setup() {
   turnButtonIsPressed = false;
 
   rssiThresholdValue = -65;
+
+  initSD();
 
   // start scanning for peripherals with duplicates
   //BLE.scanForName("SimplePeripheral"); 
@@ -211,8 +214,8 @@ bool isNearEdge()
   */
 
   int tmp = getLastAverageRSSIValue();
-  Serial.print("tmp = ");
-  Serial.println(tmp);
+  //Serial.print("tmp = ");
+  //Serial.println(tmp);
   if(tmp > rssiThresholdValue)
   {
     //Serial.println("NOW");

@@ -1,5 +1,5 @@
 
-const int advertisingLedLoopMAX = 100000;
+const int advertisingLedLoopMAX = 1000000;
 int advertisingLedLoop = 0;
 bool advertisingLedBool = false;
 

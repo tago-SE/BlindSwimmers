@@ -59,62 +59,78 @@ void trainingModeLoop()
 
 void handlePeripheralDeviceTraining(BLEDevice peripheral)
 {
-  if(dedugging)
+  if(!saveDataPauseResume)
   {
-    Serial.println("-----------------------");
-    Serial.print("Peripheral device \"");
-    Serial.print(peripheral.localName());
-    Serial.println("\" discovered");
-
-    // print address
-    Serial.print("Address: ");
-    Serial.println(peripheral.address());
-
-    // print the local name, if present
-    if (peripheral.hasLocalName()) {
-      Serial.print("Local Name: ");
-      Serial.println(peripheral.localName());
-    }
+    
+  }
+  else
+  {
+    if(dedugging)
+    {
+      Serial.println("-----------------------");
+      Serial.print("Peripheral device \"");
+      Serial.print(peripheral.localName());
+      Serial.println("\" discovered");
   
-    // print the advertised service UUIDs, if present
-    if (peripheral.hasAdvertisedServiceUuid()) {
-      Serial.print("Service UUIDs: ");
-      for (int i = 0; i < peripheral.advertisedServiceUuidCount(); i++) {
-        Serial.print(peripheral.advertisedServiceUuid(i));
-        Serial.print(" ");
+      // print address
+      Serial.print("Address: ");
+      Serial.println(peripheral.address());
+  
+      // print the local name, if present
+      if (peripheral.hasLocalName()) {
+        Serial.print("Local Name: ");
+        Serial.println(peripheral.localName());
       }
+    
+      // print the advertised service UUIDs, if present
+      if (peripheral.hasAdvertisedServiceUuid()) {
+        Serial.print("Service UUIDs: ");
+        for (int i = 0; i < peripheral.advertisedServiceUuidCount(); i++) {
+          Serial.print(peripheral.advertisedServiceUuid(i));
+          Serial.print(" ");
+        }
+        Serial.println();
+      }
+    
+      // print the RSSI
+      Serial.print("RSSI: ");
+      Serial.println(peripheral.rssi());
+    }
+    
+    //fingerprint(peripheral.rssi());
+  
+    String sensorId = peripheral.localName();
+    int rssiValue = peripheral.rssi();
+    int averageRSSIValue = getAverageRSSI(peripheral.rssi(), peripheral.localName());
+    long timeValue =/* timeStamp + */(millis() - startMillis);
+  
+    //save to SD-Card
+    if(turnButtonIsPressed)
+    {
+      String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonIsPressed + "\t" + timeStamp;
+      writeToFileWrapper(strToSD);
+    }
+    else
+    {
+      String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonIsPressed + "\t" + timeStamp;
+      writeToFileWrapper(strToSD);
+    }
+    turnButtonIsPressed = false;
+  
+    //if turn button is pressed on app, set to false
+    /*if(turnButtonPressed)
+    {
+      turnButtonPressed = false;
+    }*/
+  
+    if(dedugging)
+    {
+      Serial.print("Average RSSI here is: ");
+      Serial.println(averageRSSIValue);
       Serial.println();
     }
-  
-    // print the RSSI
-    Serial.print("RSSI: ");
-    Serial.println(peripheral.rssi());
   }
   
-  //fingerprint(peripheral.rssi());
-
-  String sensorId = peripheral.localName();
-  int rssiValue = peripheral.rssi();
-  int averageRSSIValue = getAverageRSSI(peripheral.rssi(), peripheral.localName());
-  long timeValue = timeStamp + (millis() - startMillis);
-  bool turnButtonPressed = turnButtonIsPressed;
-
-  //save to SD-Card
-  String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonPressed;
-  //writeToFileWrapper(strToSD);
-
-  //if turn button is pressed on app, set to false
-  if(connectedToDevice)
-  {
-    turnButtonPressed = false;
-  }
-
-  if(dedugging)
-  {
-    Serial.print("Average RSSI here is: ");
-    Serial.println(averageRSSIValue);
-    Serial.println();
-  }
   
   restartLoopValueTraining = 0;
   restartScan();
