@@ -87,7 +87,6 @@ void blePeripheralDisconnectHandler(BLEDevice central)
     Serial.print("Disconnected event, central: ");
     Serial.println(central.address());
   }
-  
   connectedToDevice = false;
 }
 
@@ -203,31 +202,39 @@ void handleAppSentMessage(String str)
   else if(str.startsWith("TS_"))
   {
     str = str.substring(3);
-    timeStamp = str.toInt();
+
+    //since timeStamp is a long and longer then an int
+    //the string is needed to be devided into 2 seperate integer and then
+    //added together in the long value
+    //(for example: long = int + int)
+
+    timeStamp = str;
     startMillis = millis();
-    //if(dedugging)
-    //{
-      //Serial.print("  timeStamp: ");
-      //Serial.println(timeStamp);
+    /*
+    if(dedugging)
+    {
+      Serial.print("  timeStamp: ");
+      Serial.println(timeStamp);
 
-      //Serial.print("  startMillis: ");
-      //Serial.println(startMillis);
+      Serial.print("  startMillis: ");
+      Serial.println(startMillis);
 
-      //long timeValue = timeStamp + (millis() - startMillis);
+      long timeValue = timeStamp + (millis() - startMillis);
 
-      //Serial.print("  timeValue: ");
-      //Serial.println(timeValue);
+      Serial.print("  timeValue: ");
+      Serial.println(timeValue);
       
-    //}
+    }
+    */
   }
   //button pressed on app to turn now
   else if(str.startsWith("T"))
   {
     turnButtonIsPressed = true;
-    String turn = "TURN";
-    long timeLongString = /* timeStamp + */(millis() - startMillis);
-    String turnString = turn + "\t" + timeLongString;
-    writeToFileWrapper(turnString);
+    //String turn = "TURN";
+    //long timeLongString = /* timeStamp + */(millis() - startMillis);
+    //String turnString = turn + "\t" + timeLongString;
+    //writeToFileWrapper(turnString);
   }
   else if(str.startsWith("SD_CLEAR"))
   {

@@ -12,6 +12,7 @@ void trainingModeSetup()
   {
     Serial.println("Training mode");
   }
+  initSD();
 }
 
 void trainingModeLoop()
@@ -104,17 +105,9 @@ void handlePeripheralDeviceTraining(BLEDevice peripheral)
     int averageRSSIValue = getAverageRSSI(peripheral.rssi(), peripheral.localName());
     long timeValue =/* timeStamp + */(millis() - startMillis);
   
-    //save to SD-Card
-    if(turnButtonIsPressed)
-    {
-      String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonIsPressed + "\t" + timeStamp;
-      writeToFileWrapper(strToSD);
-    }
-    else
-    {
-      String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonIsPressed + "\t" + timeStamp;
-      writeToFileWrapper(strToSD);
-    }
+    
+    String strToSD = sensorId + "\t" + rssiValue + "\t" + averageRSSIValue + "\t" + timeValue + "\t" + turnButtonIsPressed + "\t" + timeStamp;
+    writeToFileWrapper(strToSD);
     turnButtonIsPressed = false;
   
     //if turn button is pressed on app, set to false

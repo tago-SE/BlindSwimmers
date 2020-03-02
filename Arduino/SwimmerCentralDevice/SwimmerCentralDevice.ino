@@ -29,7 +29,7 @@ bool dedugging = true;
 int const sensorArraySize = 2;
 String sensorArray [sensorArraySize];
 
-const int ledPin = LED_BUILTIN; // pin to use for the LED
+const int ledPin = 6;//LED_BUILTIN; // pin to use for the LED
 
 //Looping modes, used in loop function
 /**
@@ -42,7 +42,7 @@ const int ledPin = LED_BUILTIN; // pin to use for the LED
 int loopingMode;
 
 //timeStamp in long, sent from app when device is first connected
-long timeStamp;
+String timeStamp;
 long startMillis;
 
 //used in training mode, app presses button to turn
@@ -56,7 +56,7 @@ int rssiThresholdValue;
  */
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(2000000);
   if(dedugging)
   {
     //wait till serial monitor is on
@@ -88,7 +88,7 @@ void setup()
 
   
 
-  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin, HIGH);
   //==============================================================================
 
   //set starting mode (0 == paring mode)
@@ -97,13 +97,11 @@ void setup()
   //Init fingerprinting
   initFingerPrint();
 
-  timeStamp = 0;
+  timeStamp = "0";
 
   turnButtonIsPressed = false;
 
   rssiThresholdValue = -65;
-
-  initSD();
 
   // start scanning for peripherals with duplicates
   //BLE.scanForName("SimplePeripheral"); 

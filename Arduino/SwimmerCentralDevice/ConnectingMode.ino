@@ -1,5 +1,5 @@
 
-const int advertisingLedLoopMAX = 1000000;
+const int advertisingLedLoopMAX = 100000;
 int advertisingLedLoop = 0;
 bool advertisingLedBool = false;
 
@@ -43,11 +43,13 @@ void toggleLed()
 {
   if(advertisingLedBool)
   {
+    //Serial.println("led off");
     advertisingLedBool = false;
     digitalWrite(ledPin, LOW);
   }
   else
   {
+    //Serial.println("led on");
     advertisingLedBool = true;
     digitalWrite(ledPin, HIGH);
   }

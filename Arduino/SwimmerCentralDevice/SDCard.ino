@@ -67,33 +67,32 @@ void writeLineToFile(String filename, String line)
 
 void writeToFileWrapper(String line) 
 {
-    // If the buffer is not yet full we save it in the cache and write it at a later stage
-    if (write_buffer_index < WRITE_BUFFER_SIZE) 
+  // If the buffer is not yet full we save it in the cache and write it at a later stage
+  if (write_buffer_index < WRITE_BUFFER_SIZE) 
+  {
+    write_buffer[write_buffer_index] = line;
+    write_buffer_index++;
+  } 
+  else 
+  {
+    Serial.println("writing batch");
+    //myFile = SD.open(TEST_DATA_FILE, FILE_WRITE);
+    if (myFile)
     {
-      write_buffer[write_buffer_index] = line;
-      write_buffer_index = write_buffer_index + 1;
-    } 
-    else 
-    {
-      Serial.println("writing batch");
-      //myFile = SD.open(TEST_DATA_FILE, FILE_WRITE);
-      if (myFile)
-      {
-          for (int i = 0; i < write_buffer_index; i++) 
-          {
-            Serial.println(TEST_DATA_FILE + " wrote: " + write_buffer[i]);
-            myFile.println(write_buffer[i]);
-          }
-          write_buffer_index = 0;
-          //myFile.close();
-      }
-      else
-      {
-          Serial.print("error opening: ");
-          Serial.println(TEST_DATA_FILE);
-      }
-      
+        for (int i = 0; i < WRITE_BUFFER_SIZE; i++) 
+        {
+          myFile.println(write_buffer[i]);
+          Serial.println(TEST_DATA_FILE + " wrote: " + write_buffer[i]);
+        }
+        write_buffer_index = 0;
+        //myFile.close();
     }
+    else
+    {
+        Serial.print("error opening: ");
+        Serial.println(TEST_DATA_FILE);
+    }
+  }
 }
 
 void closeWrapper()
