@@ -8,6 +8,10 @@ public class RGBColor {
     private int green;
     private int blue;
 
+    private int hue;
+    private int saturation;
+    private int value;
+
     public RGBColor() {
         // Empty Constructor
     }
@@ -50,6 +54,13 @@ public class RGBColor {
         blue = Integer.valueOf(hexColor.substring(5, 7), 16);
     }
 
+    public int[] getRGB() {
+        return new int[]{red,green,blue};
+    }
+    public int[] getHSV(){
+        return new int[]{hue,saturation,value};
+    }
+
     public int getRed() {
         return red;
     }
@@ -74,12 +85,39 @@ public class RGBColor {
         this.blue = blue;
     }
 
+    public int getHue() {
+        return hue;
+    }
+
+    public void setHue(int hue) {
+        this.hue = hue;
+    }
+
+    public int getSaturation() {
+        return saturation;
+    }
+
+    public void setSaturation(int saturation) {
+        this.saturation = saturation;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
     @Override
     public String toString() {
         return "RGBColor{" +
-                " red=" + red +
+                "red=" + red +
                 ", green=" + green +
                 ", blue=" + blue +
+                ", hue=" + hue +
+                ", saturation=" + saturation +
+                ", value=" + value +
                 '}';
     }
 }

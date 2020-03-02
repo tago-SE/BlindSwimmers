@@ -46,8 +46,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toConfigCameraButton.setOnClickListener(this);
         Button toMainCameraButton = findViewById(R.id.mainCamera);
         toMainCameraButton.setOnClickListener(this);
+        Button backDoorButton = findViewById(R.id.backdoor);
+        backDoorButton.setOnClickListener(this);
     }
-
 
     @Override
     public void onClick(View view) {
@@ -57,6 +58,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.mainCamera:
                 startActivity(new Intent(this, MainCameraActivity.class));
+                break;
+            case R.id.backdoor:
+                Log.d(TAG, "Intent Adjust Capture Settings");
+                startActivity(new Intent(this, AdjustCaptureSettings.class));
                 break;
             default: break;
         }

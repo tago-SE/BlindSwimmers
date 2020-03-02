@@ -3,11 +3,15 @@ package s.m.myapplication;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import s.m.myapplication.model.CameraFacade;
+import s.m.myapplication.popup.Popup;
 import top.defaults.colorpicker.ColorPickerPopup;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.text.InputType;
@@ -21,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -31,8 +36,11 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
+import java.util.Arrays;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 
@@ -43,7 +51,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
  *  https://www.techotopia.com/index.php/Android_Pinch_Gesture_Detection_Tutorial_using_Android_Studio
  */
 public class MainCameraActivity extends AppCompatActivity implements
-        CameraBridgeViewBase.CvCameraViewListener2 {
+        CameraBridgeViewBase.CvCameraViewListener2,CameraBridgeViewBase.OnTouchListener {
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -58,13 +66,35 @@ public class MainCameraActivity extends AppCompatActivity implements
     private Button resizeButton;
     private Button colorHighButton;
     private Button colorLowButton;
+    private Button resetButton;
+    private Button HSVButton;
     private int screenWidth;
     private int screenHeight;
 
     private final Context context = this;
 
+    private Mat mHsv;
+    private Mat mask;
+
     // Manages the configurations for the camera
-    private CameraFacade camera = CameraFacade.getInstance();
+    private final CameraFacade camera = CameraFacade.getInstance();
+
+    private double selectedX;
+    private double selectedY;
+
+    private double x = -1;
+    private double y = -1;
+
+    private Scalar mBlobColorHsv;
+    private Scalar mBlobColorRgba;
+
+
+    private  TextView touch_coordinates;
+    private  TextView touch_color;
+
+    private Dialog dialog;
+
+    private Popup popup;
 
     private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this)
     {
@@ -93,7 +123,8 @@ public class MainCameraActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main_camera);
         // We lock it to landscape mode so that Region Of Interest calculations are not disturbed...
         setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-
+        dialog = new Dialog(this);
+        popup = new Popup(this);
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -107,6 +138,7 @@ public class MainCameraActivity extends AppCompatActivity implements
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setOnTouchListener(this);
         resizeButton = findViewById(R.id.resizeButton);
         resizeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +146,8 @@ public class MainCameraActivity extends AppCompatActivity implements
                 showTextDialog();
             }
         });
+        resetButton = findViewById(R.id.Refresh);
+        resetButton.setOnClickListener((v)->{reset();});
         colorHighButton = findViewById(R.id.colorHighButton);
         colorHighButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,6 +162,44 @@ public class MainCameraActivity extends AppCompatActivity implements
                 showColorPicker(v);
             }
         });
+
+        HSVButton = findViewById(R.id.HSVButton);
+        HSVButton.setOnClickListener((v)->{showHSVpopup(v);});
+
+        touch_coordinates = (TextView) findViewById(R.id.touch_coordinates);
+        touch_color = (TextView) findViewById(R.id.touch_color);
+    }
+
+    private void showHSVpopup(View v) {
+        popup.showDialog(camera);
+      /*  dialog.setContentView(R.layout.popuphsv);
+        dialog.show();
+
+        TextView hueText = dialog.findViewById(R.id.Hue);
+
+        hueText.setText("Hue : " + camera.getLowerHSV().getHue());
+
+        SeekBar hueSeek = dialog.findViewById(R.id.HueSeekId);
+        hueSeek.setProgress(camera.getLowerHSV().getHue());
+        hueSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int index = 0;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                index = i;
+                hueText.setText("Hue : " +index);
+             //   seekBar.setProgress();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+               camera.getLowerHSV().setHue(index);
+               hueText.setText("Hue : " +index);
+            }
+        });*/
     }
 
     private void showColorPicker(final View v) {
@@ -212,6 +284,10 @@ public class MainCameraActivity extends AppCompatActivity implements
         builder.show();
     }
 
+    private void reset(){
+        camera.setVisionIsBlackWhite(false);
+
+    }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int index = event.getActionIndex();
@@ -220,6 +296,8 @@ public class MainCameraActivity extends AppCompatActivity implements
         switch(action) {
             case MotionEvent.ACTION_DOWN:
                 Log.w(TAG, "onTouchEvent:ACTION_DOWN");
+                selectedX = event.getX();
+                selectedY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.w(TAG, "onTouchEvent:ACTION_MOVE");
@@ -245,10 +323,16 @@ public class MainCameraActivity extends AppCompatActivity implements
         mRgba = new Mat(height, width, CvType.CV_8UC4);
         mRgbaF = new Mat(height, width, CvType.CV_8UC4);
         mRgbaT = new Mat(width, width, CvType.CV_8UC4);
+
+
+        mHsv = new Mat(width, height, CvType.CV_8UC1);
+        mask = new Mat(width, height, CvType.CV_8UC1);
+        //mHsv = new Mat(width, height, CvType.CV_8UC1);
         camera.setFrameDimensions(width, height);
         ViewGroup.LayoutParams params = resizeButton.getLayoutParams();
         params.width = (screenWidth - width)/2;
         resizeButton.setLayoutParams(params);
+
     }
 
     @Override
@@ -259,8 +343,10 @@ public class MainCameraActivity extends AppCompatActivity implements
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+
         mRgba = inputFrame.rgba();
 
+        /*
         switch (mOpenCvCameraView.getDisplay().getRotation()) {
             case Surface.ROTATION_0: // Vertical portrait
                 Core.transpose(mRgba, mRgbaT);
@@ -280,12 +366,51 @@ public class MainCameraActivity extends AppCompatActivity implements
                 break;
             default:
         }
+        */
+
+
         // Render Region Of Interest
-        Imgproc.rectangle(mRgba,
+        /*Imgproc.rectangle(mRgba,
                 camera.getRegionOfInterestStartPoint(),
                 camera.getRegionOfInterestEndPoint(),  new Scalar(0, 0, 255), 10);
 
+        Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGB2HSV);
+        Log.i("ARR","From " + selectedX + " " + selectedY);
+        Log.i("ARR","From mRgba " + Arrays.toString(mRgba.get((int)selectedX,(int)selectedY)));
+
+
+        Scalar scalarLow = new Scalar(35,20,10);
+        Scalar scalarHigh = new Scalar(75,255,255);
+        Core.inRange(mHsv, getLowerScalar(), getHighScalar(), mask);
+
+        lower_blue = np.array([100,50,50])
+    upper_blue = np.array([130,255,255])
+
+    lower = np.array([155,25,0])
+upper = np.array([179,255,255])
+         */
+
+        if(camera.isVisionIsBlackWhite()){
+            Log.i("VIS","I make it visible " + getLowerScalar().val[0] + " " +  getLowerScalar().val[1] + " " + getLowerScalar().val[2] + " ");
+            Imgproc.cvtColor(mRgba, mHsv, Imgproc.COLOR_RGB2HSV);
+            //Core.inRange(mHsv, new Scalar(155,25,0), new Scalar(179,255,255), mask);
+            Core.inRange(mHsv, mBlobColorHsv, getHighScalar(), mask);
+
+            return mask;
+        }
+       // getLowerScalar();
+       // getHighScalar();
         return mRgba;
+    }
+
+    private Scalar getLowerScalar() {
+        int[] rgb = camera.getLowerRGB();
+        return new Scalar(rgb[0], rgb[1], rgb[2]);
+    }
+
+    public Scalar getHighScalar() {
+        int[] rgb = camera.getUpperRGB();
+        return new Scalar(rgb[0], rgb[1], rgb[2]);
     }
 
     @Override
@@ -315,4 +440,106 @@ public class MainCameraActivity extends AppCompatActivity implements
             mOpenCvCameraView.disableView();
     }
 
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+
+        Log.i("TOUCH", "on onTouch");
+
+        int cols = mRgba.cols();
+        int rows = mRgba.rows();
+
+
+        double yLow = (double)mOpenCvCameraView.getHeight() * 0.2401961;
+        double yHigh = (double)mOpenCvCameraView.getHeight() * 0.7696078;
+
+        double xScale = (double)cols / (double)mOpenCvCameraView.getWidth();
+        double yScale = (double)rows / (yHigh - yLow);
+
+        x = motionEvent.getX();
+        y = motionEvent.getY();
+
+
+        y = y - yLow;
+
+        x = x * xScale;
+        y = y * yScale;
+
+
+        if((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
+
+        touch_coordinates.setText("X: " + Double.valueOf(x) + ", Y: " + Double.valueOf(y));
+
+
+        Rect touchedRect = new Rect();
+
+        touchedRect.x = (int)x;
+        touchedRect.y = (int)y;
+
+        touchedRect.width = 8;
+        touchedRect.height = 8;
+
+        Mat touchedRegionRgba = mRgba.submat(touchedRect);
+
+        Mat touchedRegionHsv = new Mat();
+        Imgproc.cvtColor(touchedRegionRgba, touchedRegionHsv, Imgproc.COLOR_RGB2HSV_FULL);
+
+        mBlobColorHsv = Core.sumElems(touchedRegionHsv);
+        int pointCount = touchedRect.width * touchedRect.height;
+
+
+        for (int i = 0; i < mBlobColorHsv.val.length; i++)
+            mBlobColorHsv.val[i] /= pointCount;
+
+        mBlobColorRgba = convertScalarHsv2Rgba(mBlobColorHsv);
+
+
+        touch_color.setText("Color: #" + String.format("%02X", (int)mBlobColorRgba.val[0])
+                + String.format("%02X", (int)mBlobColorRgba.val[1])
+                + String.format("%02X", (int)mBlobColorRgba.val[2]));
+
+
+
+        Log.i("COLOR","The color " + mBlobColorRgba.val[0] + " " + mBlobColorRgba.val[1] + " " + mBlobColorRgba.val[2]);
+        Log.i  ("HSV","The color " + mBlobColorHsv.val[0] + " " + mBlobColorHsv.val[1] + " " + mBlobColorHsv.val[2]);
+        touch_color.setTextColor(Color.rgb((int) mBlobColorRgba.val[0],
+                (int) mBlobColorRgba.val[1],
+                (int) mBlobColorRgba.val[2]));
+        touch_coordinates.setTextColor(Color.rgb((int)mBlobColorRgba.val[0],
+                (int)mBlobColorRgba.val[1],
+                (int)mBlobColorRgba.val[2]));
+        camera.setVisionIsBlackWhite(true);
+        camera.setHSV(mBlobColorHsv);
+        return false;
+    }
+
+    private Scalar convertScalarHsv2Rgba(Scalar hsvColor) {
+        Mat pointMatRgba = new Mat();
+        Mat pointMatHsv = new Mat(1, 1, CvType.CV_8UC3, hsvColor);
+        Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_HSV2RGB_FULL, 4);
+
+        return new Scalar(pointMatRgba.get(0, 0));
+    }
+
+    public CameraFacade getCamera(){
+        return camera;
+    }
 }
+
+ /*   array = mRgba.get((int)selectedX,(int)selectedY);
+           Log.i("ARR",Arrays.toString(array));
+           /*
+             lower_blue = np.array([100,50,50])
+             upper_blue = np.array([130,255,255])
+
+              scalarLow  = new Scalar(array[0]-75,array[1]-75,array[2]-75);
+           scalarHigh = new Scalar(array[0]+75,array[1]+75,array[2]-75);
+
+            upper =  np.array([pixel[0] + 10, pixel[1] + 10, pixel[2] + 40])
+        lower =  np.array([pixel[0] - 10, pixel[1] - 10, pixel[2] - 40])
+            */
+           /*scalarLow  = new Scalar(array[0]-10,array[1]-10,array[2]-40);
+           scalarHigh = new Scalar(array[0]+10,array[1]+10,array[2]+40);
+           Core.inRange(mHsv,scalarLow,scalarHigh,mask);
+           isPixelTouched = false;
+           keepTouched = true;
+           return mask;*/
