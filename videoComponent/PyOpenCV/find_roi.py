@@ -7,6 +7,7 @@ from shapely.geometry import Polygon
 LOWER_COLOR = np.array([161, 155, 84])
 UPPER_COLOR = np.array([179, 255, 255])
 
+# Default rendering properties for the ROI 
 ROI_MARGIN = 12
 ROI_COLOR = (55, 55, 55)
 ROI_THICKNESS = 2
