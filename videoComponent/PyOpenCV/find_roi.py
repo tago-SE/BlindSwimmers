@@ -8,13 +8,13 @@ UPPER_COLOR = np.array([179, 255, 255])
 ROI_MARGIN = 12
 ROI_COLOR = (55, 55, 55)
 ROI_THICKNESS = 2
-LANE_INTERSECTION_THRESHOLD = -20 
+LANE_INTERSECTION_THRESHOLD = - 30 
 
 class RegionOfInterest:
 
     def __init__(self, left_hull, right_hull):
         self.x = left_hull["x"] + left_hull["w"] + ROI_MARGIN
-        self.y = left_hull["y"] if left_hull["y"] > right_hull["y"] else right_hull["y"]
+        self.y = (left_hull["y"] if left_hull["y"] > right_hull["y"] else right_hull["y"]) + ROI_MARGIN
         self.w = right_hull["x"] - (left_hull["x"] + left_hull["w"]) - 2*ROI_MARGIN
         self.h = left_hull["h"] if left_hull["h"] > right_hull["h"] else right_hull["h"]
         self.topLeftCorner = (self.x, self.y)
@@ -23,7 +23,7 @@ class RegionOfInterest:
         self.botRightCorner = (right_hull["x"] + right_hull["w"], self.y + self.h)
         self.leftHull = left_hull["hull"]
         self.rightHull = right_hull["hull"]
-
+       
         # This section will adjust the bottom corners in case they intersect with the left and right contours 
         dist = - 100
         while True: 
@@ -39,19 +39,18 @@ class RegionOfInterest:
                 self.botRightCorner = (x - 15, y)
             else: break
 
-
+        self.parallelogram = np.array([self.topLeftCorner, self.botLeftCorner, self.botRightCorner, self.topRightCorner], np.int32)
 
     def draw(self, frame, color=ROI_COLOR, thickness=ROI_THICKNESS, drawContours=False): 
-        cv2.line(frame, (self.x, self.y), (self.x + self.w, self.y), color, thickness) 
-        cv2.line(frame, self.topLeftCorner, self.botLeftCorner, color, thickness) 
-        cv2.line(frame, self.topRightCorner, self.botRightCorner, color, thickness) 
+        cv2.polylines(frame, [self.parallelogram], True, color, thickness)
         if drawContours:
+            cv2.drawContours(frame, [self.rightHull], -1, (0, 0, 255), 1)
             cv2.drawContours(frame, [self.leftHull], -1, (0, 0, 255), 1)
 
+    def is_inside(self, x1, y1, x2, y2):
 
-    # Returns true if (x,y) is inside the region of interest
-    def is_point_inside(self, x, y):
-        return True 
+
+        return False
 
 
 def find_region_of_interest(frame):
