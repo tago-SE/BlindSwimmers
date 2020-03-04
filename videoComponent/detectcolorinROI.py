@@ -1,7 +1,15 @@
 import numpy as np
 import cv2  
 
-cap = cv2.VideoCapture(0)
+from datetime import datetime
+
+timestamp = 1545730073
+dt_object = datetime.fromtimestamp(timestamp)
+
+print("dt_object =", dt_object)
+print("type(dt_object) =", type(dt_object))
+
+cap = cv2.VideoCapture('MOV_0748.mp4')
 
 while True:
     _, frame = cap.read()
@@ -48,6 +56,8 @@ while True:
             # print(hull)
              if xg > upper_left[0] and (xg+wg) < bottom_right[0] and yg > upper_left[1]  and (yg+hg) < bottom_right[1]:      
                 rect = cv2.rectangle(frame, upper_left, bottom_right, colour2 , 2)
+                cv2.putText(frame,"Hello World!!!", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, 255)
+                print('swimmer found')
     #        if len(bluecnts)>0:
     #    blue_area = max(bluecnts, key=cv2.contourArea)
     #    (xg,yg,wg,hg) = cv2.boundingRect(blue_area)           
