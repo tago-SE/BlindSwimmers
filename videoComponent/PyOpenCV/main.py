@@ -28,11 +28,11 @@ MIN_TIME_SINCE_LAST_FOUND = 1.0
 
 lapses = []
 
-
 def __on_enter(ts):
     global last_entered_ts 
     last_entered_ts = ts
     print("ENTER: ", ts) 
+
 
 def __on_exit(ts):
     global has_left, last_exited_ts
@@ -50,7 +50,7 @@ def __on_exit(ts):
 
 if __name__ == "__main__":
 
-    cap = cv2.VideoCapture('videos/MOV_0750.mp4')
+    cap = cv2.VideoCapture('videos/MOV_0747.mp4')
 
     while cap.isOpened():
         
