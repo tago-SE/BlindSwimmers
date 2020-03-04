@@ -4,7 +4,7 @@ from shapely.geometry import Polygon
 from find_roi import RegionOfInterest
 import contours as contours_helper
 
-# define red color range for the side lane
+# define color range for the side lane
 LOWER_COLOR = np.array([161, 155, 84])
 UPPER_COLOR = np.array([179, 255, 255])
 

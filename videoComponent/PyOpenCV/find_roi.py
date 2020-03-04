@@ -81,12 +81,10 @@ def find_region_of_interest(frame):
     mask = cv2.inRange(dilated, LOWER_COLOR, UPPER_COLOR)
 
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    #print(len(contours))
 
     hulls = __get_largest_hulls(contours, sorted=True)
     if (len(hulls) < 2):
         print("ERROR: Lost one or more of the lanes")
-        ##exit()  # this is just for debugging, should probably be removed
 
     hulls = hulls[:2] ## need to test what would happen if it found 0 or 1...
 
@@ -96,7 +94,7 @@ def find_region_of_interest(frame):
 
     # DEBUG: show mask and frame on separate screen
     #   cv2.imshow('mask', mask)
-
+    
     return roi
       
 
