@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from shapely.geometry import Polygon
+
 
 # define red color range for the side lane
 LOWER_COLOR = np.array([161, 155, 84])
@@ -21,9 +23,11 @@ class RegionOfInterest:
         self.topRightCorner = (self.x + self.w, self.y)
         self.botLeftCorner = (left_hull["x"], self.y + self.h)
         self.botRightCorner = (right_hull["x"] + right_hull["w"], self.y + self.h)
+
+        # The lane hulls
         self.leftHull = left_hull["hull"]
         self.rightHull = right_hull["hull"]
-       
+
         # This section will adjust the bottom corners in case they intersect with the left and right contours 
         dist = - 100
         while True: 
@@ -39,18 +43,25 @@ class RegionOfInterest:
                 self.botRightCorner = (x - 15, y)
             else: break
 
-        self.parallelogram = np.array([self.topLeftCorner, self.botLeftCorner, self.botRightCorner, self.topRightCorner], np.int32)
+        # Creates a contour of the points making up the ROI
+        self.contour = np.array([self.topLeftCorner, self.botLeftCorner, self.botRightCorner, self.topRightCorner], np.int32)
 
-    def draw(self, frame, color=ROI_COLOR, thickness=ROI_THICKNESS, drawContours=False): 
-        cv2.polylines(frame, [self.parallelogram], True, color, thickness)
-        if drawContours:
+
+    def draw(self, frame, color=ROI_COLOR, thickness=ROI_THICKNESS, drawLaneContours=False): 
+        cv2.drawContours(frame, [self.contour], 0, color, thickness)
+        if drawLaneContours:
             cv2.drawContours(frame, [self.rightHull], -1, (0, 0, 255), 1)
             cv2.drawContours(frame, [self.leftHull], -1, (0, 0, 255), 1)
 
-    def is_inside(self, x1, y1, x2, y2):
+    def rect_is_inside(self, x1, y1, x2, y2):
+        p1 = Polygon([(x1, y1), (x2, y2), (x2 + 1, y2 + 1)])
+        p2 = Polygon([self.topLeftCorner, self.botLeftCorner, self.botRightCorner, self.topRightCorner])
+        return p1.intersects(p2)
 
-
-        return False
+    def point_is_inside(self, x, y):
+        p1 = Polygon([(x, y), (x + 1, y + 1), (x + 2, y + 2)])
+        p2 = Polygon([self.topLeftCorner, self.botLeftCorner, self.botRightCorner, self.topRightCorner])
+        return p1.intersects(p2)
 
 
 def find_region_of_interest(frame):
@@ -75,7 +86,7 @@ def find_region_of_interest(frame):
     hulls = __get_largest_hulls(contours, sorted=True)
     if (len(hulls) < 2):
         print("ERROR: Lost one or more of the lanes")
-        exit()  # this is just for debugging, should probably be removed
+        ##exit()  # this is just for debugging, should probably be removed
 
     hulls = hulls[:2] ## need to test what would happen if it found 0 or 1...
 
@@ -95,7 +106,7 @@ def __get_largest_hulls(contours, sorted=True):
         hull = cv2.convexHull(contour)
         x, y, w, h = cv2.boundingRect(hull)
         area = w*h
-        if area > 12000:
+        if area > 1000:
             hulls.append({"contour": contour, "hull": hull, "area": area, "x": x, "y": y, "w": w, "h": h})
     if (sorted):
         hulls.sort(key=lambda dct: dct['area'], reverse=True)
