@@ -10,9 +10,22 @@ UPPER_COLOR = np.array([179, 255, 255])
 ROI_MARGIN = 12
 ROI_COLOR = (55, 55, 55)
 ROI_THICKNESS = 2
+
+# Used to prevent the ROI contour from intersecting with the lane contours 
 LANE_INTERSECTION_THRESHOLD = - 30 
 
+# Should be a value between 0.0 and 1.0, smaller value means the ROI has a reduced height, 1.0 means that the ROI will be 5 meters
+ROI_SCALE = 0.9
+
 class RegionOfInterest:
+
+    def __get_new_point(self, p0, p1, scale):
+        scale = 1 - scale
+        (x0, y0) = p0
+        (x1, y1) = p1
+        y = y0 + (y1 - y0)*scale
+        x = (y - y0)/((y1 - y0)/(x1 - x0)) + x0 
+        return (x, y)
 
     def __init__(self, left_hull, right_hull):
         self.x = left_hull["x"] + left_hull["w"] + ROI_MARGIN
@@ -23,6 +36,12 @@ class RegionOfInterest:
         self.topRightCorner = (self.x + self.w, self.y)
         self.botLeftCorner = (left_hull["x"], self.y + self.h)
         self.botRightCorner = (right_hull["x"] + right_hull["w"], self.y + self.h)
+
+        if (ROI_SCALE < 1.0 and ROI_SCALE > 0.0):
+            (x, y) = self.__get_new_point(self.topLeftCorner, self.botLeftCorner, 0.9)
+            self.topLeftCorner = (x + ROI_MARGIN, y)
+            (x, y) = self.__get_new_point(self.topRightCorner, self.botRightCorner, 0.9)
+            self.topRightCorner = (x - ROI_MARGIN, y)
 
         # The lane hulls
         self.leftHull = left_hull["hull"]
@@ -94,7 +113,7 @@ def find_region_of_interest(frame):
 
     # DEBUG: show mask and frame on separate screen
     #   cv2.imshow('mask', mask)
-    
+
     return roi
       
 

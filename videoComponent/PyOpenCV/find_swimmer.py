@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from shapely.geometry import Polygon
 from find_roi import RegionOfInterest
-import contours as contours_helper
 
 # define color range for the side lane
 LOWER_COLOR = np.array([161, 155, 84])
@@ -54,6 +53,8 @@ def find_swimmer(frame, roi):
         hull = cv2.convexHull(contour)
         x, y, w, h = cv2.boundingRect(hull)
 
+        # This part filters away contours that does not have 3 out of 4 points inside the ROI 
+        
         inside_point_count = 0
         if roi.point_is_inside(x, y):
             inside_point_count = inside_point_count + 1
