@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import time 
+import sys 
 
 import find_roi as find_roi
 from find_roi import RegionOfInterest
@@ -12,16 +13,14 @@ END_KEY = 'q'
 drawing = True
 mousePos = (0, 0)
 
-def mouse_drawing(event, x, y, flags, params):
-    global mousePos
-    if event == cv2.EVENT_MOUSEMOVE:
-        mousePos = (x, y)
-
 last_entered_ts = 0
 last_exited_ts = 0
 last_found_ts = 0
 has_left = True 
 pool_length = 25
+
+# Default value is 1 which means that every frame will be processed. 2 = every other frame, 3 = every third frame and so on...
+FRAME_PROCESSED_FACTOR = 4
 
 # Time in seconds which the object is allowed to be lost without alerting the system on exit
 MIN_TIME_SINCE_LAST_FOUND = 1.0 
@@ -36,7 +35,6 @@ def __on_enter(ts):
 
 def __on_exit(ts):
     global has_left, last_exited_ts
-
     if (last_exited_ts != 0):
         lapse_time = t - last_exited_ts
         print("lapse duration: ", lapse_time, " s") 
@@ -50,17 +48,35 @@ def __on_exit(ts):
 
 if __name__ == "__main__":
 
-    cap = cv2.VideoCapture('videos/MOV_0747.mp4')
+    arg_len = len(sys.argv)
+    if arg_len <= 1:
+        print("ERROR: Need to provide arguments")
+        exit()
+    if sys.argv[1] == "-v" or sys.argv[1] == "-video": 
+        if arg_len <= 2:
+            print("ERROR: Need to specify video file.") 
+            exit()  
+        videofile = sys.argv[2]
+        if not (videofile.endswith(".mp4")):
+            print("ERROR: Videofile must end with .mp4")
+            exit()
+    elif sys.argv[1] == "-c" or sys.argv[1] == "-camera":
+        videofile = 0
+        print("WARNING: Live camera feed has not been tested properly.")    
+    else:
+        print("ERROR: Command was not recognized.")
+        exit()
 
+    cap = cv2.VideoCapture(videofile)
+
+    i = -1
     while cap.isOpened():
-        
         _, frame = cap.read()
-
+        i = (i + 1) % 2
+        if not i == 0:
+            continue
+            
         frame = cv2.resize(frame, (960, 540))
-
-        #cv2.setMouseCallback('frame', mouse_drawing)
-        #(mx, my) = mousePos
-        #cv2.rectangle(frame, (mx, my), (mx + 10, my + 10), (0, 255, 0))
 
         roi = find_roi.find_region_of_interest(frame)
         swimmer = find_swimmer.find_swimmer(frame, roi)
