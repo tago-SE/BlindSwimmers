@@ -4,12 +4,37 @@ from shapely.geometry import Polygon
 from find_roi import RegionOfInterest
 
 # define color range for the side lane
-LOWER_COLOR = np.array([161, 155, 84])
-UPPER_COLOR = np.array([179, 255, 255])
+lower_color = np.array([161, 155, 84])
+upper_color = np.array([179, 255, 255])
 
 SWIM_COLOR = (55, 55, 55)
 SWIM_THICKNESS = 2
 LANE_INTERSECTION_THRESHOLD = - 30 
+
+swimmer_mask = None 
+
+
+def get_swimmer_mask():
+    return swimmer_mask
+
+
+def set_lower_color(lower):
+    global lower_color
+    lower_color = lower
+    print("changed: ", lower)
+
+
+def set_upper_color(upper):
+    global upper_color
+    upper_color = upper
+
+
+def get_upper_color():
+    return upper_color
+
+def get_lower_color():
+    return lower_color
+
 
 class Swimmer:
     
@@ -25,6 +50,7 @@ class Swimmer:
 
 # Takes a frame and the roi returns a swimmer object 
 def find_swimmer(frame, roi):
+    global swimmer_mask
     
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     
@@ -38,9 +64,9 @@ def find_swimmer(frame, roi):
     dilated = cv2.dilate(blurred_frameHSV,convince,5)
 
     #Mask the dilated range
-    mask = cv2.inRange(dilated, LOWER_COLOR, UPPER_COLOR)
+    swimmer_mask = cv2.inRange(dilated, lower_color, upper_color)
 
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(swimmer_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     swim_x1 = 99999999 
     swim_y1 = 99999999 

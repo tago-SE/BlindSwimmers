@@ -4,6 +4,7 @@ import time
 import sys 
 import imutils
 import args_helper as args_helper
+import hsv_picker as hsv_picker
 
 import find_roi as find_roi
 from find_roi import RegionOfInterest
@@ -131,8 +132,22 @@ if __name__ == "__main__":
 
         cv2.imshow('frame', frame)  
 
-        if cv2.waitKey(5) == ord(END_KEY):
+        swimmer_mask = find_swimmer.get_swimmer_mask()
+        cv2.imshow('mask', swimmer_mask)  
+     
+
+        key = cv2.waitKey(5)
+        if key == ord(END_KEY):
             break
+    
+        elif key == ord("p"):
+            hsv_picker.set_image(frame)
+            hsv_picker.setup_trackbars("HSV")
+
+            cv2.waitKey(0) 
+        
+        elif key == ord("b"):
+            cv2.waitKey(0) 
 
     cap.release()
     cv2.destroyAllWindows()
