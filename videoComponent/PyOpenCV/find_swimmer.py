@@ -53,17 +53,19 @@ def find_swimmer(frame, roi):
         x, y, w, h = cv2.boundingRect(hull)
 
         # This part filters away contours that does not have 3 out of 4 points inside the ROI 
-        
-        inside_point_count = 0
-        if roi.point_is_inside(x, y):
-            inside_point_count = inside_point_count + 1
-        if roi.point_is_inside(x + w, y):
-            inside_point_count = inside_point_count + 1
-        if roi.point_is_inside(x + w, y + h):
-            inside_point_count = inside_point_count + 1
-        if inside_point_count < 3 and roi.point_is_inside(x, y + h):
-            inside_point_count = inside_point_count + 1
-        
+        if roi is not None:
+            inside_point_count = 0
+            if roi.point_is_inside(x, y):
+                inside_point_count = inside_point_count + 1
+            if roi.point_is_inside(x + w, y):
+                inside_point_count = inside_point_count + 1
+            if roi.point_is_inside(x + w, y + h):
+                inside_point_count = inside_point_count + 1
+            if inside_point_count < 3 and roi.point_is_inside(x, y + h):
+                inside_point_count = inside_point_count + 1
+        else: 
+            inside_point_count = 4 #since
+            
         if inside_point_count >= 3: 
             swimmer_found = True 
             if x < swim_x1: 

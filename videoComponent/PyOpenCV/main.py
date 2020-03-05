@@ -123,10 +123,11 @@ if __name__ == "__main__":
             if last_found_ts < t - MIN_TIME_SINCE_LAST_FOUND and not has_left: 
                 __on_exit(t)
     
-        if has_left:
-            roi.draw(frame, drawLaneContours=False, color=(0, 0, 255))
-        else: 
-            roi.draw(frame, drawLaneContours=False, color=(0, 255, 0))
+        if roi != None: 
+            if has_left:
+                roi.draw(frame, drawLaneContours=False, color=(0, 0, 255))
+            else: 
+                roi.draw(frame, drawLaneContours=False, color=(0, 255, 0))
 
         cv2.imshow('frame', frame)  
 

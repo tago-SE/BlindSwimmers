@@ -104,8 +104,10 @@ def find_region_of_interest(frame):
     hulls = __get_largest_hulls(contours, sorted=True)
     if (len(hulls) < 2):
         print("ERROR: Lost one or more of the lanes")
+        return None # Currently does not support corner lanes 
 
     hulls = hulls[:2] ## need to test what would happen if it found 0 or 1...
+
 
     left, right = __left_right_sort(hulls[0], hulls[1])
 
