@@ -1,0 +1,4 @@
+Shapely
+numpy
+imutils
+opencv-python

@@ -1,3 +1,0 @@
-Shapely
-numpy
-opencv-python
