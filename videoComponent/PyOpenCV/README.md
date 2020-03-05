@@ -4,7 +4,7 @@
 
 # Setup
     
-    git clone
+    git clone https://github.com/tago-SE/BlindSwimmers.git
     pip install -r requirements.txt
 
 # Commands
