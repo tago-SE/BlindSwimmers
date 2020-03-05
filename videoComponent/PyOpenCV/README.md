@@ -18,6 +18,8 @@ Run the algorithm with a live feed:
     py main.py -c 
 
 Arguments:
-    -v <videofile.mp4>      # apply on videofile
-    -c                      # apply on live camera feed
-    -r <angle>              # rotate
+    -v <videofile.mp4>      # run videofile
+    -c                      # run live camera feed
+    -r <angle>              # rotate frame
+    -w <width>              # frame width
+    -h <height>             # frame height 

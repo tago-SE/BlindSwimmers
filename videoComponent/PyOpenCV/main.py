@@ -21,6 +21,8 @@ last_found_ts = 0
 has_left = True 
 pool_length = 25
 
+DEFAULT_FRAME_H = 540
+DEFAULT_FRAME_W = 960
 
 
 # Default value is 1 which means that every frame will be processed. 2 = every other frame, 3 = every third frame and so on...
@@ -77,6 +79,15 @@ if __name__ == "__main__":
     if args_helper.is_key_present(sys.argv, "-r") or args_helper.is_key_present(sys.argv, "-rotation"):
         rotation_angle = int(args_helper.get_value_after_key(sys.argv, "-r", "-rotation"))
 
+
+    frameW = DEFAULT_FRAME_W
+    if args_helper.is_key_present(sys.argv, "-w") or args_helper.is_key_present(sys.argv, "-width"):
+        frameW = int(args_helper.get_value_after_key(sys.argv, "-w", "-width"))
+    frameH = DEFAULT_FRAME_H
+    if args_helper.is_key_present(sys.argv, "-h") or args_helper.is_key_present(sys.argv, "-height"):
+        frameH = int(args_helper.get_value_after_key(sys.argv, "-h", "-height"))
+
+
     cap = cv2.VideoCapture(videofile)
     
     i = -1
@@ -90,7 +101,7 @@ if __name__ == "__main__":
         if not i == 0:
             continue
             
-        frame = cv2.resize(frame, (960, 540))
+        frame = cv2.resize(frame, (frameW, frameH))
         cv2.imshow('frame', frame)  
 
         roi = find_roi.find_region_of_interest(frame)
