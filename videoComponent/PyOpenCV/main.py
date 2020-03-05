@@ -20,7 +20,9 @@ has_left = True
 pool_length = 25
 
 # Default value is 1 which means that every frame will be processed. 2 = every other frame, 3 = every third frame and so on...
-FRAME_PROCESSED_FACTOR = 3
+FRAME_PROCESSED_FACTOR = 1
+if FRAME_PROCESSED_FACTOR < 1:
+    FRAME_PROCESSED_FACTOR = 1
 
 # Time in seconds which the object is allowed to be lost without alerting the system on exit
 MIN_TIME_SINCE_LAST_FOUND = 1.0 
@@ -68,11 +70,12 @@ if __name__ == "__main__":
         exit()
 
     cap = cv2.VideoCapture(videofile)
+    
 
     i = -1
     while cap.isOpened():
         _, frame = cap.read()
-        i = (i + 1) % 2
+        i = (i + 1) % FRAME_PROCESSED_FACTOR
         if not i == 0:
             continue
             
