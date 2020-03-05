@@ -16,3 +16,8 @@ Run the algorithm on a video:
 Run the algorithm with a live feed:
 
     py main.py -c 
+
+Arguments:
+    -v <videofile.mp4>      # apply on videofile
+    -c                      # apply on live camera feed
+    -r <angle>              # rotate

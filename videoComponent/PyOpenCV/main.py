@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import time 
 import sys 
+import imutils
+import args_helper as args_helper
 
 import find_roi as find_roi
 from find_roi import RegionOfInterest
@@ -18,6 +20,8 @@ last_exited_ts = 0
 last_found_ts = 0
 has_left = True 
 pool_length = 25
+
+
 
 # Default value is 1 which means that every frame will be processed. 2 = every other frame, 3 = every third frame and so on...
 FRAME_PROCESSED_FACTOR = 1
@@ -69,22 +73,31 @@ if __name__ == "__main__":
         print("ERROR: Command was not recognized.")
         exit()
 
+    rotation_angle = 0
+    if args_helper.is_key_present(sys.argv, "-r") or args_helper.is_key_present(sys.argv, "-rotation"):
+        rotation_angle = int(args_helper.get_value_after_key(sys.argv, "-r", "-rotation"))
+
     cap = cv2.VideoCapture(videofile)
     
-
     i = -1
     while cap.isOpened():
         _, frame = cap.read()
+
+        if rotation_angle != 0:
+            frame = imutils.rotate_bound(frame, angle=rotation_angle)
+        
         i = (i + 1) % FRAME_PROCESSED_FACTOR
         if not i == 0:
             continue
             
         frame = cv2.resize(frame, (960, 540))
+        cv2.imshow('frame', frame)  
 
         roi = find_roi.find_region_of_interest(frame)
         swimmer = find_swimmer.find_swimmer(frame, roi)
 
         t = time.time()
+
         if swimmer != None: 
             last_found_ts = t
             if (last_entered_ts < t - MIN_TIME_SINCE_LAST_FOUND and has_left):
