@@ -28,7 +28,6 @@ def mouse_drawing(event, x, y, flags, params):
         point2 = (x + 20, y + 20)
 def setup_trackbars(range_filter):
     cv2.namedWindow("Trackbars", 0)
-
     for i in ["MIN", "MAX"]:
         v = 0 if i == "MIN" else 255
         for j in range_filter:
