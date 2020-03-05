@@ -20,7 +20,7 @@ has_left = True
 pool_length = 25
 
 # Default value is 1 which means that every frame will be processed. 2 = every other frame, 3 = every third frame and so on...
-FRAME_PROCESSED_FACTOR = 4
+FRAME_PROCESSED_FACTOR = 3
 
 # Time in seconds which the object is allowed to be lost without alerting the system on exit
 MIN_TIME_SINCE_LAST_FOUND = 1.0 

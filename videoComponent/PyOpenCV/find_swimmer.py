@@ -21,8 +21,7 @@ class Swimmer:
 
     def draw(self, frame, color=SWIM_COLOR, thickness=SWIM_THICKNESS): 
         cv2.rectangle(frame,(self.x, self.y),(self.x + self.w, self.y + self.h), color, thickness)
-        
-
+    
 
 # Takes a frame and the roi returns a swimmer object 
 def find_swimmer(frame, roi):

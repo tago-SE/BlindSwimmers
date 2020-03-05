@@ -38,11 +38,10 @@ class RegionOfInterest:
         self.botLeftCorner = (left_hull["x"], self.y + self.h)
         self.botRightCorner = (right_hull["x"] + right_hull["w"], self.y + self.h)
 
-        if (ROI_SCALE < 1.0 and ROI_SCALE > 0.0):
-            (x, y) = self.__get_new_point(self.topLeftCorner, self.botLeftCorner, 0.9)
-            self.topLeftCorner = (x + ROI_MARGIN, y)
-            (x, y) = self.__get_new_point(self.topRightCorner, self.botRightCorner, 0.9)
-            self.topRightCorner = (x - ROI_MARGIN, y)
+        (x, y) = self.__get_new_point(self.topLeftCorner, self.botLeftCorner, ROI_SCALE)
+        self.topLeftCorner = (x + ROI_MARGIN, y)
+        (x, y) = self.__get_new_point(self.topRightCorner, self.botRightCorner, ROI_SCALE)
+        self.topRightCorner = (x - ROI_MARGIN, y)
 
         # The lane hulls
         self.leftHull = left_hull["hull"]
