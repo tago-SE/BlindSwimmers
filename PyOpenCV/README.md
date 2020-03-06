@@ -1,6 +1,6 @@
 # Requirements
 * Python 3.6.8 (tested)
-* Dependencies: Shapely, numpy, opencv-python
+* Dependencies: Shapely, numpy, imutils, opencv-python
 
 # Setup
     
