@@ -15,11 +15,10 @@ Run the algorithm on a video:
 
 Run the algorithm with a live feed:
 
-    py main.py -c 
+    py main.py
 
 Arguments:
     -v <videofile.mp4>      # run videofile
-    -c                      # run live camera feed
     -r <angle>              # rotate frame
     -w <width>              # frame width
     -h <height>             # frame height 
