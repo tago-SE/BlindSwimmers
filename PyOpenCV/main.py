@@ -87,7 +87,10 @@ if __name__ == "__main__":
     
     i = -1
     while cap.isOpened():
-        _, frame = cap.read()
+        success, frame = cap.read()
+
+        if not success:
+            break
 
         if rotation_angle != 0:
             frame = imutils.rotate_bound(frame, angle=rotation_angle)
