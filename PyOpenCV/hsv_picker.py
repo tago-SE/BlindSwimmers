@@ -31,7 +31,6 @@ def render_trackbar_values(range_filter):
     for i in ["MIN", "MAX"]:
         for j in range_filter:
             v = cv2.getTrackbarPos("%s_%s" % (j, i), "Trackbars")
-            print("v", v)
             values.append(v)
 
     lower = values[0:3]

@@ -57,24 +57,18 @@ def __on_exit(ts):
 
 if __name__ == "__main__":
 
+    videofile = 0 # default, watch live feed
+    
     arg_len = len(sys.argv)
-    if arg_len <= 1:
-        print("ERROR: Need to provide arguments")
-        exit()
-    if sys.argv[1] == "-v" or sys.argv[1] == "-video": 
-        if arg_len <= 2:
-            print("ERROR: Need to specify video file.") 
-            exit()  
-        videofile = sys.argv[2]
-        if not (videofile.endswith(".mp4")):
-            print("ERROR: Videofile must end with .mp4")
-            exit()
-    elif sys.argv[1] == "-c" or sys.argv[1] == "-camera":
-        videofile = 0
-        print("WARNING: Live camera feed has not been tested properly.")    
-    else:
-        print("ERROR: Command was not recognized.")
-        exit()
+    if arg_len > 1:
+        if sys.argv[1] == "-v" or sys.argv[1] == "-video": 
+            if arg_len <= 2:
+                print("ERROR: Need to specify video file.") 
+                exit()  
+            videofile = sys.argv[2]
+            if not (videofile.endswith(".mp4")):
+                print("ERROR: Videofile must end with .mp4")
+                exit()  
 
     rotation_angle = 0
     if args_helper.is_key_present(sys.argv, "-r") or args_helper.is_key_present(sys.argv, "-rotation"):
