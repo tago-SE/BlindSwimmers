@@ -18,7 +18,11 @@ Run the algorithm with a live feed:
     py main.py
 
 Arguments:
+
     -v <videofile.mp4>      # run videofile
     -r <angle>              # rotate frame
     -w <width>              # frame width
     -h <height>             # frame height 
+
+Demo:
+https://www.youtube.com/watch?v=rmICLOLq2Ro&t=4s
